@@ -1,0 +1,36 @@
+Part 3: End-to-End Testing Strategy (2 hours)
+
+Scenario: Multi-Tier Application Deployment
+Design a comprehensive testing approach for the following user workflow:
+
+Business Scenario: A development team wants to deploy a 3-tier web application with proper
+network isolation and security controls using your VPC feature.
+
+Infrastructure Requirements:
+	1. Create a VPC (10.0.0.0/16) in us-east-1
+	2. Create three subnets:Public subnet (10.0.1.0/24) for load balancer
+		Private subnet (10.0.2.0/24) for application servers
+		Database subnet (10.0.3.0/24) for database
+	3. Configure Internet Gateway for public access
+	4. Set up NAT Gateway for private subnet outbound access
+	5. Create security groups for each tier with appropriate rules
+	6. Deploy Application Load Balancer in public subnet
+	7. Launch 2 application instances in private subnet
+	8. Set up RDS MySQL database in database subnet
+
+Deliverables for Part 3:
+1. Test Strategy Document including:
+	Testing approach overview
+	Test objectives and scope
+	Key testing scenarios
+	Risk assessment
+	Success criteria
+2. Detailed Test Plan with:
+	Step-by-step execution plan
+	Validation checkpoints
+	Expected results at each stage
+	Rollback procedures if issues are found
+3. Testing Considerations for:
+	Network connectivity between tiersSecurity isolation verification
+	Performance and scalability aspects
+	Integration points with other services

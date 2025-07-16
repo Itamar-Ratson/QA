@@ -1,0 +1,23 @@
+Submission Guidelines
+
+Format: Submit your work as a single document (PDF or Word) or organized folder structure
+with clear section headers.
+
+Include:
+	Your name and contact information
+	Time spent on each section
+	Any assumptions made
+	Questions or clarifications needed
+	Recommendations for improving the testing process
+
+Evaluation Criteria:
+	Technical accuracy and depth
+	Systematic approach to testing
+	Clear communication and documentation
+	Understanding of cloud infrastructure concepts
+	Problem-solving methodology
+	Attention to detail
+
+Questions? If you have any questions about the requirements or need clarifications, please don't
+hesitate to reach out.
+Good luck!

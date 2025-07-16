@@ -1,0 +1,37 @@
+Part 4: API Testing Approach (1 hour)
+
+VPC Management API
+	You have access to REST API endpoints for VPC management. Design test scenarios for the
+	following API operations:
+
+	Available Endpoints:
+		POST /v1/vpcs
+		GET /v1/vpcs
+		GET /v1/vpcs/{vpc_id}
+		PUT /v1/vpcs/{vpc_id}
+		DELETE /v1/vpcs/{vpc_id}
+
+	Sample API Request:
+		json
+		POST /v1/vpcs
+		{
+		"name": "my-vpc",
+		"cidr_block": "10.0.0.0/16",
+		"region": "us-east-1",
+		"enable_dns_resolution": true,
+		"enable_dns_hostnames": false
+		}
+
+	Deliverables for Part 4:
+	1. API Test Scenarios covering:
+		CRUD operations testing
+		Input validation
+		Authentication and authorization
+		Error handling
+		Rate limiting
+		Concurrent request handling
+	2. Test Implementation Plan:
+		Testing tools/framework recommendation
+		Test data setup requirements
+		Expected response codes and payloads
+		Performance baseline suggestions

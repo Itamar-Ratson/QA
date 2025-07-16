@@ -1,0 +1,40 @@
+Part 1: Test Case Design (2-3 hours)
+
+Feature Specification: VPC Creation
+	You are tasked with testing a new VPC creation feature with the following requirements:
+
+Functional Requirements:
+	Users can create a Virtual Private Cloud with a specified CIDR block
+	CIDR block must be between /16 and /28 (e.g., 10.0.0.0/16, 192.168.1.0/24)
+	VPC names must be 1-255 characters long, containing only alphanumeric characters,
+	hyphens, and underscores
+	Each account is limited to 5 VPCs per region
+	VPC creation must complete within 30 seconds under normal conditions
+	DNS resolution and DNS hostnames can be enabled or disabled (both optional)
+	VPC must be created in a specific availability zone region
+
+Technical Constraints:
+	CIDR blocks cannot overlap with existing VPCs in the same region
+	Private IP ranges only (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+	System must handle concurrent VPC creation requests
+
+User Interface:
+	Web-based form with fields for VPC name, CIDR block, region selection, and DNS options
+	Real-time validation for CIDR format
+	Success/error messaging
+
+Deliverables for Part 1:
+	1. Comprehensive Test Cases covering:
+		Positive/Happy path scenarios
+		Boundary value testing
+		Negative testing scenarios
+		Edge cases
+		Integration scenarios
+	2. Test Case Format should include:
+		Test case ID
+		Test case description
+		Pre-conditions
+		Test steps
+		Expected results
+		Priority (High/Medium/Low)
+		Category (Functional/UI/API/Performance/Security)

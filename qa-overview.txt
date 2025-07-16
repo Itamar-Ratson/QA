@@ -1,0 +1,7 @@
+Manual QA Engineer Take-Home Assignment
+Overview
+This assignment evaluates your manual testing skills for cloud infrastructure platforms. You'll be
+working with a Virtual Private Cloud (VPC) feature similar to AWS VPC, focusing on test case
+design, bug investigation, and end-to-end testing scenarios.
+Time Allocation: 6-8 hours total Submission Format: Document(s) with clear sections for each
+deliverable

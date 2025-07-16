@@ -1,0 +1,41 @@
+Part 2: Bug Investigation and Reporting (2-3 hours)
+
+Scenario
+	You've been given access to a staging environment where users have reported issues with the
+	VPC feature. Investigate the following problems and provide detailed bug reports.
+
+Issue 1: "VPC Creation Sometimes Fails"
+	User Report: "When I try to create a VPC with CIDR 10.0.0.0/16, it sometimes works and
+	sometimes gives an error message 'Creation failed - please try again'"
+	Frequency: Reported by 3 different users
+	Environment: Staging environment, us-east-1 region
+	Additional Info: Seems to happen more frequently during peak hours
+
+Issue 2: "DNS Settings Not Working"
+	User Report: "I enabled DNS resolution when creating my VPC, but instances can't resolve
+	domain names"
+	Environment: Staging environment, us-west-2 region
+	Additional Info: User created VPC successfully, launched instances, but DNS queries fail
+
+Issue 3: "CIDR Validation Inconsistency"
+	User Report: "The system accepted my CIDR block 10.0.0.0/15 in the UI, but then failed
+	during creation"
+	Environment: Both staging and production
+	Additional Info: Error occurs after form submission, not during real-time validation
+
+Deliverables for Part 2:
+	For each issue, provide:
+
+	1. Bug Report including:
+		Bug title and description
+		Steps to reproduce
+		Expected vs actual behavior
+		Environment details
+		Severity assessment (Critical/High/Medium/Low)
+		Priority recommendation
+		Screenshots/logs if applicable
+	2. Investigation Analysis:
+		Potential root causes
+		Areas of the system that might be affected
+		Suggestions for verification testing
+		Risk assessment if left unfixed
