@@ -5,7 +5,7 @@
 **Bug ID:** VPC-001  
 **Bug Title:** Intermittent VPC Creation Failure with CIDR 10.0.0.0/16  
 **Reporter:** QA Team  
-**Date:** [Current Date]  
+**Date:** July 17, 2025  
 **Environment:** Staging environment, us-east-1 region
 
 ## Description
@@ -34,8 +34,8 @@ VPC creation with CIDR block 10.0.0.0/16 fails intermittently, displaying generi
 ## Environment Details
 - **Environment:** Staging
 - **Region:** us-east-1
-- **Browser:** [Not specified]
-- **Frequency:** Intermittent (reported by 3 users)
+- **Users Affected:** 3 confirmed reports
+- **Frequency:** Intermittent
 - **Peak Hours Correlation:** Yes
 
 ## Severity Assessment
