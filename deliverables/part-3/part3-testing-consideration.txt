@@ -1,0 +1,63 @@
+# Testing Considerations: Multi-Tier Application Deployment
+
+## Network Connectivity Between Tiers
+
+**Testing Approach:**
+- Verify routing between public subnet (ALB), private subnet (app servers), and database subnet
+- Test connectivity paths: Internet → ALB → App Servers → Database
+- Validate NAT Gateway provides outbound access for private subnet
+- Confirm cross-AZ communication within the VPC
+
+**Validation Methods:**
+- Telnet/nc testing for specific ports (80, 8080, 3306)
+- Traceroute to verify routing paths
+- DNS resolution testing between tiers
+- Network latency measurement between components
+
+---
+
+## Security Isolation Verification
+
+**Testing Approach:**
+- Validate security group rules enforce proper tier isolation
+- Confirm database is only accessible from application tier
+- Verify no direct internet access to private resources
+- Test unauthorized access attempts fail appropriately
+
+**Validation Methods:**
+- Attempt direct database connection from internet (should fail)
+- Test application server access bypassing ALB (should fail)  
+- Port scanning from unauthorized sources
+- Security group rule validation against requirements
+
+---
+
+## Performance and Scalability Aspects
+
+**Testing Approach:**
+- Establish performance baselines for each tier
+- Test system behavior under increasing load
+- Validate load balancer distributes traffic effectively
+- Measure response times and throughput limits
+
+**Validation Methods:**
+- Load testing with Apache Bench (ab) for HTTP traffic
+- Database connection and query performance testing
+- Concurrent user simulation up to expected capacity
+- Resource utilization monitoring during load tests
+
+---
+
+## Integration Points with Other Services
+
+**Testing Approach:**
+- Verify ALB health checks function correctly
+- Test application-to-database connectivity and transactions
+- Validate monitoring and logging integration
+- Confirm infrastructure provisioning consistency
+
+**Validation Methods:**
+- ALB target health status verification
+- Database connection pooling and transaction testing
+- CloudWatch metrics collection validation
+- Terraform deployment repeatability testing
