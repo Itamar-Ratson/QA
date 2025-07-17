@@ -89,7 +89,7 @@ VPC creation with CIDR block 10.0.0.0/16 fails intermittently, displaying generi
 5. Add monitoring and alerting for VPC creation failures
 # Bug Report: DNS Settings Not Working
 
-##################################################
+######################################################################################################################################################
 
 ## Bug Details
 
@@ -192,7 +192,7 @@ DNS resolution fails for instances within VPC despite DNS resolution being enabl
 6. **Validation:** Add automated tests for DNS functionality post-VPC creation
 # Bug Report: CIDR Validation Inconsistency
 
-##################################################
+######################################################################################################################################################
 
 ## Bug Details
 
