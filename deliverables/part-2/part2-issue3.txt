@@ -1,0 +1,94 @@
+# Bug Report: CIDR Validation Inconsistency
+
+## Bug Details
+
+**Bug ID:** VPC-003  
+**Bug Title:** UI Accepts Invalid CIDR Block That Backend Rejects  
+**Reporter:** QA Team  
+**Date:** July 17, 2025  
+**Environment:** Both staging and production
+
+## Description
+System accepts CIDR block 10.0.0.0/15 in UI real-time validation but fails during backend creation process, creating inconsistent validation experience between frontend and backend.
+
+## Steps to Reproduce
+1. Navigate to VPC creation form
+2. Enter VPC name (e.g., "cidr-test-vpc")
+3. Input CIDR block: 10.0.0.0/15
+4. Select any region
+5. Configure DNS settings (any configuration)
+6. Observe UI validation passes (no error shown)
+7. Click "Create VPC"
+8. Observe backend validation failure after form submission
+
+## Expected Behavior
+- UI validation should reject CIDR blocks outside /16 to /28 range
+- Backend and frontend validation should be consistent
+- User should receive immediate feedback for invalid CIDR
+- No form submission should occur with invalid CIDR
+
+## Actual Behavior
+- UI real-time validation accepts 10.0.0.0/15 (invalid per requirements)
+- Form submission proceeds successfully
+- Backend validation fails after submission
+- User experiences delayed error feedback
+- Inconsistent validation rules between UI and backend
+
+## Environment Details
+- **Environment:** Both staging and production
+- **CIDR Block:** 10.0.0.0/15 (invalid - outside /16 to /28 range)
+- **Validation Point:** UI passes, backend fails
+- **Error Timing:** Post-submission
+
+## Severity Assessment
+**MEDIUM** - Functional issue affecting user experience and validation consistency
+
+## Priority Recommendation
+**MEDIUM** - Should be fixed to maintain validation consistency and user experience
+
+## Additional Evidence
+- Requirements specify /16 to /28 CIDR range
+- /15 is larger than /16 minimum, therefore invalid
+- Issue occurs in both environments
+- Real-time validation logic differs from backend validation
+
+---
+
+## Investigation Analysis
+
+### Potential Root Causes
+1. **Validation Logic Mismatch:** Frontend and backend use different CIDR validation rules
+2. **Requirements Interpretation:** Frontend developer misunderstood CIDR range requirements
+3. **Code Synchronization:** Backend validation updated but frontend not synchronized
+4. **Regular Expression Error:** Frontend regex pattern incorrectly allows /15
+5. **Testing Gap:** Frontend validation not properly tested against requirements
+
+### Areas of System Affected
+- Frontend CIDR validation component
+- Backend CIDR validation service
+- Form submission workflow
+- User experience and error handling
+- Validation consistency across environments
+
+### Verification Testing Suggestions
+1. **Boundary Testing:** Test all CIDR ranges from /8 to /32 in UI
+2. **Backend Validation Audit:** Review backend validation rules for CIDR
+3. **Frontend Code Review:** Examine real-time validation logic
+4. **Cross-Environment Testing:** Verify issue exists in all environments
+5. **Requirements Validation:** Confirm CIDR range requirements (/16 to /28)
+6. **Regex Testing:** Test CIDR validation regular expressions
+
+### Risk Assessment if Left Unfixed
+- **User Experience:** Confusing validation behavior frustrates users
+- **Time Waste:** Users spend time on invalid configurations
+- **Support Overhead:** Increased support tickets for validation confusion
+- **Trust Issues:** Inconsistent validation reduces user confidence
+- **Development Risk:** Other validation inconsistencies may exist
+
+### Recommendations
+1. **Immediate:** Align frontend validation with backend requirements
+2. **Code Review:** Audit all validation logic for consistency
+3. **Testing:** Add comprehensive validation tests for boundary conditions
+4. **Documentation:** Update validation requirements documentation
+5. **Quality Process:** Implement validation consistency checks in CI/CD
+6. **User Feedback:** Improve error messages for validation failures
