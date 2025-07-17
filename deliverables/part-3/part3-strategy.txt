@@ -1,0 +1,104 @@
+# Test Strategy Document: Multi-Tier Application Deployment
+
+## Testing Approach Overview
+
+This document outlines the testing strategy for validating a 3-tier web application deployment using VPC infrastructure.
+
+**Testing Methodology**: Bottom-up testing approach where infrastructure components are validated individually before testing integrated functionality (infrastructure → network → application), ensuring each layer functions correctly before building upon it.
+
+## Test Objectives and Scope
+
+### Primary Objectives
+- **Infrastructure Validation**: Verify all VPC components are correctly provisioned and configured
+- **Network Connectivity**: Ensure proper traffic flow between all tiers with intended restrictions
+- **Security Compliance**: Validate network isolation and security group effectiveness
+- **Performance Baseline**: Establish performance metrics for the deployed architecture
+- **Integration Verification**: Confirm seamless interaction between all application components
+
+### Scope
+- VPC creation and configuration (10.0.0.0/16 in us-east-1)
+- Subnet deployment and routing (public, private, database tiers)
+- Gateway configuration (Internet Gateway, NAT Gateway)
+- Security group implementation and rule validation
+- Application Load Balancer deployment and configuration
+- EC2 instance deployment in private subnet
+- RDS MySQL database setup in database subnet
+- End-to-end application functionality testing
+
+## Key Testing Scenarios
+
+### Infrastructure Provisioning Tests
+- **VPC Creation**: Validate VPC with correct CIDR block and region
+- **Subnet Configuration**: Verify three subnets with proper CIDR allocation
+- **Gateway Deployment**: Confirm IGW and NAT Gateway functionality
+- **Route Table Setup**: Validate routing rules for each subnet type
+
+### Network Connectivity Tests
+- **Public Tier Access**: Internet → ALB → Application servers
+- **Private Tier Communication**: ALB → Application servers → Database
+- **Outbound Access**: Application servers → Internet via NAT Gateway
+- **Internal Communication**: Application servers ↔ Database servers
+
+### Security Isolation Tests
+- **Tier Separation**: Verify no direct access between inappropriate tiers
+- **Security Group Rules**: Validate port restrictions and source limitations
+- **Database Isolation**: Confirm database accessible only from application tier
+- **Public Access Restrictions**: Ensure private resources remain private
+
+### Performance and Load Tests
+- **Connection Limits**: Test maximum concurrent connections
+- **Response Times**: Baseline latency between tiers
+- **Throughput Testing**: Database and application performance under load
+- **Auto-scaling Behavior**: If configured, test scaling triggers
+
+### Integration Validation Tests
+- **Application Deployment**: Full application stack functionality
+- **Database Connectivity**: Application → Database communication
+- **Load Balancer Health Checks**: ALB health check validation
+- **Session Management**: User session persistence across instances
+
+## Risk Assessment
+
+### High Risk Areas
+- Security Group Misconfiguration
+- Network Routing Issues
+- Database Connectivity Failure
+- Load Balancer Misconfiguration
+
+### Medium Risk Areas
+- NAT Gateway failure affecting outbound connectivity
+- Subnet CIDR conflicts during expansion
+- Performance degradation under load
+- SSL/TLS certificate issues
+
+### Low Risk Areas
+- VPC creation failure (well-tested AWS service)
+- Basic EC2 instance provisioning
+- RDS database creation
+
+## Success Criteria
+
+### Functional Success Criteria
+- **Complete Infrastructure Deployment**: All components provisioned without errors
+- **Network Connectivity**: 100% successful connectivity tests between appropriate tiers
+- **Security Validation**: Zero unauthorized access attempts succeed
+- **Application Functionality**: Full user workflow completion rate ≥ 99%
+- **Database Operations**: All CRUD operations execute successfully
+
+### Performance Success Criteria
+- **Response Time**: ALB → Application server latency < 100ms
+- **Database Queries**: Application → Database response < 200ms
+- **Throughput**: System handles 1000 concurrent users without degradation
+- **Availability**: 99.9% uptime during testing period
+
+### Security Success Criteria
+- **Access Control**: No successful unauthorized tier access
+- **Data Protection**: Database accessible only from application tier
+- **Traffic Encryption**: All inter-tier communication properly encrypted
+- **Compliance**: Security groups follow principle of least privilege
+
+### Integration Success Criteria
+- **End-to-End Workflow**: Complete user journey from web request to database response
+- **Load Distribution**: Traffic evenly distributed across application instances
+- **Health Monitoring**: All health checks return positive status
+- **Error Handling**: Graceful degradation when components are unavailable
