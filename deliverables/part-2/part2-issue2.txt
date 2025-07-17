@@ -1,0 +1,101 @@
+# Bug Report: DNS Settings Not Working
+
+## Bug Details
+
+**Bug ID:** VPC-002  
+**Bug Title:** DNS Resolution Not Functioning Despite Being Enabled During VPC Creation  
+**Reporter:** QA Team  
+**Date:** July 17, 2025  
+**Environment:** Staging environment, us-west-2 region
+
+## Description
+DNS resolution fails for instances within VPC despite DNS resolution being enabled during VPC creation. Domain name queries fail even though VPC creation was successful and DNS settings appear correctly configured.
+
+## Steps to Reproduce
+1. Navigate to VPC creation form
+2. Enter VPC name (e.g., "dns-test-vpc")
+3. Input valid CIDR block (e.g., 10.0.0.0/16)
+4. Select region: us-west-2
+5. Enable "DNS resolution" option
+6. Click "Create VPC" - VPC creates successfully
+7. Launch instances within the VPC
+8. Attempt DNS queries from instances (e.g., nslookup google.com)
+9. Observe DNS resolution failure
+
+## Expected Behavior
+- DNS resolution should work for instances within VPC when DNS resolution is enabled
+- Domain names should resolve to IP addresses
+- Both internal and external DNS queries should function
+- DNS hostnames should be resolvable if enabled
+
+## Actual Behavior
+- VPC creation succeeds with DNS resolution enabled
+- Instances launch successfully within VPC
+- DNS queries fail from instances
+- Domain names cannot be resolved
+- No clear error indication during VPC creation process
+
+## Environment Details
+- **Environment:** Staging
+- **Region:** us-west-2
+- **VPC Creation:** Successful
+- **Instance Launch:** Successful
+- **DNS Resolution:** Enabled during creation
+- **DNS Hostnames:** Status unknown
+
+## Severity Assessment
+**HIGH** - Critical functionality failure affecting instance connectivity
+
+## Priority Recommendation
+**HIGH** - Blocks normal instance operations and network functionality
+
+## Additional Evidence
+- VPC shows as successfully created
+- DNS resolution setting appears enabled in VPC configuration
+- All other VPC functionality works normally
+- Issue specific to DNS resolution functionality
+
+---
+
+## Investigation Analysis
+
+### Potential Root Causes
+1. **DNS Service Configuration:** DNS resolver service not properly configured for VPC
+2. **Route Table Issues:** Missing routes to DNS servers (169.254.169.253)
+3. **Security Group Rules:** Blocking DNS traffic (port 53 UDP/TCP)
+4. **DHCP Options:** Incorrect or missing DHCP option sets for DNS servers
+5. **Backend Service:** DNS resolution service not properly linked to VPC
+6. **Regional Issue:** DNS service malfunction specific to us-west-2
+
+### Areas of System Affected
+- DNS resolution service
+- VPC networking configuration
+- DHCP options management
+- Route table configuration
+- Instance networking stack
+- Regional DNS infrastructure
+
+### Verification Testing Suggestions
+1. **DNS Server Reachability:** Test connectivity to 169.254.169.253 from instances
+2. **DHCP Options Check:** Verify DHCP option sets assigned to VPC
+3. **Route Table Analysis:** Check for DNS resolver routes in VPC route tables
+4. **Security Group Audit:** Verify DNS ports (53) are not blocked
+5. **Regional Testing:** Test DNS functionality in other regions
+6. **Instance Network Config:** Check /etc/resolv.conf on instances
+7. **VPC Configuration Validation:** Verify DNS settings are properly applied
+
+### Risk Assessment if Left Unfixed
+- **Operational Impact:** Instances cannot resolve domain names, breaking applications
+- **User Experience:** Complete DNS functionality failure
+- **Business Impact:** Applications dependent on DNS resolution will fail
+- **Support Overhead:** Users cannot use instances effectively
+- **Reputation Risk:** Core networking feature non-functional
+- **Security Risk:** Potential workarounds may introduce vulnerabilities
+
+### Recommendations
+1. **Immediate:** Verify DNS resolver service status in us-west-2
+2. **Configuration Check:** Audit DHCP options and route table configurations
+3. **Regional Testing:** Test DNS functionality across all regions
+4. **Monitoring:** Implement DNS resolution monitoring for VPCs
+5. **Documentation:** Update troubleshooting guides for DNS issues
+6. **Validation:** Add automated tests for DNS functionality post-VPC creation
