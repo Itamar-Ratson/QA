@@ -1,5 +1,6 @@
 # VPC Creation - Comprehensive Test Cases
 
+##################################################
 ## Positive/Happy Path Scenarios
 
 ### TC-001
@@ -50,6 +51,7 @@
 **Priority:** High  
 **Category:** Functional
 
+##################################################
 ## Boundary Value Testing
 
 ### TC-004
@@ -97,6 +99,7 @@
 **Priority:** High  
 **Category:** Functional
 
+##################################################
 ## Negative Testing Scenarios
 
 ### TC-007
@@ -144,6 +147,7 @@
 **Priority:** High  
 **Category:** Functional
 
+##################################################
 ## Edge Cases
 
 ### TC-010
@@ -190,6 +194,7 @@
 **Priority:** Medium  
 **Category:** Functional
 
+##################################################
 ## Integration Scenarios
 
 ### TC-013
