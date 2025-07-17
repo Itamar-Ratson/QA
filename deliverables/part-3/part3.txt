@@ -103,7 +103,7 @@ This document outlines the testing strategy for validating a 3-tier web applicat
 - **Health Monitoring**: All health checks return positive status
 - **Error Handling**: Graceful degradation when components are unavailable
 
-##################################################
+########################################################################################################################
 
 # Detailed Test Plan: 3-Tier Application Deployment
 
@@ -765,7 +765,7 @@ e2e-vpc-test/
 - No unnecessary AWS charges
 - Complete test artifact removal
 
-##################################################
+########################################################################################################################
 
 # Testing Considerations: Multi-Tier Application Deployment
 
