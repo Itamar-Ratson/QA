@@ -1,0 +1,28 @@
+# Phase 10: Performance Testing
+
+## Test Step 10.1: Load Testing
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+# Load test with 50 concurrent connections
+ab -n 1000 -c 50 http://$ALB_DNS/
+```
+
+**Validation Checkpoints:**
+- Handles 50 concurrent users
+- Response times < 2 seconds
+
+## Test Step 10.2: Failover Testing
+**Action:**
+```bash
+# Stop one instance
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ec2 stop-instances --instance-ids $INSTANCE_ID
+
+# Verify traffic continues
+for i in {1..10}; do curl -s http://$ALB_DNS; sleep 2; done
+```
+
+**Validation Checkpoints:**
+- ALB detects unhealthy instance
+- No service interruption

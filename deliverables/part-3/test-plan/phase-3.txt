@@ -1,0 +1,41 @@
+# Phase 3: Internet Connectivity Setup
+
+## Test Step 3.1: Add Gateways
+**Action:**
+1. Create `gateways.tf`:
+   ```hcl
+   resource "aws_internet_gateway" "main" {
+     vpc_id = aws_vpc.main.id
+     tags = { Name = "e2e-test-igw" }
+   }
+   
+   resource "aws_eip" "nat" {
+     domain     = "vpc"
+     depends_on = [aws_internet_gateway.main]
+     tags = { Name = "e2e-nat-eip" }
+   }
+   
+   resource "aws_nat_gateway" "main" {
+     allocation_id = aws_eip.nat.id
+     subnet_id     = aws_subnet.public.id
+     depends_on    = [aws_internet_gateway.main]
+     tags = { Name = "e2e-test-nat" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- IGW attached to VPC
+- NAT Gateway available (3-5 min)
+
+**Expected Results:**
+- IGW and NAT ready for routing
+
+**Rollback Procedure:**
+```bash
+terraform destroy -auto-approve
+```

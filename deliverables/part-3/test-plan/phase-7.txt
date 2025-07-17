@@ -1,0 +1,64 @@
+# Phase 7: Application Instance Deployment
+
+## Test Step 7.1: Add Instances
+**Action:**
+1. Create `instances.tf`:
+   ```hcl
+   data "aws_ami" "amazon_linux" {
+     most_recent = true
+     owners      = ["amazon"]
+     filter {
+       name   = "name"
+       values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+     }
+   }
+   
+   resource "aws_instance" "app" {
+     count                  = 2
+     ami                    = data.aws_ami.amazon_linux.id
+     instance_type          = "t3.micro"
+     subnet_id              = aws_subnet.private.id
+     vpc_security_group_ids = [aws_security_group.application.id]
+     
+     user_data = base64encode(<<-EOF
+       #!/bin/bash
+       yum update -y
+       yum install -y httpd
+       systemctl start httpd
+       systemctl enable httpd
+       echo "<h1>App Server ${count.index + 1}</h1>" > /var/www/html/index.html
+       echo "OK" > /var/www/html/health
+       EOF
+     )
+     
+     tags = { Name = "app-server-${count.index + 1}" }
+   }
+   
+   resource "aws_lb_target_group_attachment" "app" {
+     count            = 2
+     target_group_arn = aws_lb_target_group.app.arn
+     target_id        = aws_instance.app[count.index].id
+     port             = 8080
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 2 instances in private subnet
+- Target group registration
+
+**Expected Results:**
+- Health checks pass (5 min)
+
+## Test Step 7.2: Add Instance Outputs
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "app_instance_ids" {
+     value = aws_instance.app[*].id
+   }
+   ```

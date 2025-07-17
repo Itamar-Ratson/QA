@@ -1,0 +1,54 @@
+# Phase 8: Database Setup
+
+## Test Step 8.1: Add RDS Database
+**Action:**
+1. Create `rds.tf`:
+   ```hcl
+   resource "aws_db_subnet_group" "main" {
+     name       = "e2e-db-subnet-group"
+     subnet_ids = [aws_subnet.database.id, aws_subnet.private.id]
+     
+     tags = { Name = "e2e-db-subnet-group" }
+   }
+   
+   resource "aws_db_instance" "main" {
+     identifier           = "e2e-mysql-db"
+     engine               = "mysql"
+     engine_version       = "8.0"
+     instance_class       = "db.t3.micro"
+     allocated_storage    = 20
+     
+     db_name  = "e2edb"
+     username = "admin"
+     password = "changeme123!"
+     
+     vpc_security_group_ids = [aws_security_group.database.id]
+     db_subnet_group_name   = aws_db_subnet_group.main.name
+     
+     publicly_accessible = false
+     skip_final_snapshot = true
+     
+     tags = { Name = "e2e-mysql-db" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- RDS creation completes (15-20 min)
+- Not publicly accessible
+
+**Expected Results:**
+- Database endpoint available
+
+## Test Step 8.2: Add Database Output
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "db_endpoint" {
+     value = aws_db_instance.main.endpoint
+   }
+   ```

@@ -1,0 +1,49 @@
+# Phase 2: Subnet Configuration
+
+## Test Step 2.1: Add Subnet Resources
+**Action:**
+1. Create `subnets.tf`:
+   ```hcl
+   resource "aws_subnet" "public" {
+     vpc_id                  = aws_vpc.main.id
+     cidr_block              = "10.0.1.0/24"
+     availability_zone       = data.aws_availability_zones.available.names[0]
+     map_public_ip_on_launch = true
+     
+     tags = { Name = "public-subnet" }
+   }
+   
+   resource "aws_subnet" "private" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.2.0/24"
+     availability_zone = data.aws_availability_zones.available.names[1]
+     
+     tags = { Name = "private-subnet" }
+   }
+   
+   resource "aws_subnet" "database" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.3.0/24"
+     availability_zone = data.aws_availability_zones.available.names[2]
+     
+     tags = { Name = "database-subnet" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 subnets created in different AZs
+- Public subnet auto-assigns public IPs
+
+**Expected Results:**
+- 3 subnet IDs available via outputs
+- Different AZs for high availability
+
+**Rollback Procedure:**
+```bash
+terraform destroy -auto-approve
+```

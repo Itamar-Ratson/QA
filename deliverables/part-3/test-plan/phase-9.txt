@@ -1,0 +1,40 @@
+# Phase 9: End-to-End Testing
+
+## Test Step 9.1: Test Public Access
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+curl -I http://$ALB_DNS
+curl http://$ALB_DNS
+for i in {1..10}; do curl -s http://$ALB_DNS | grep "App Server"; done
+```
+
+**Validation Checkpoints:**
+- HTTP 200 responses
+- Load balancing works
+
+## Test Step 9.2: Test Database Connectivity  
+**Action:**
+```bash
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ssm start-session --target $INSTANCE_ID
+# On instance:
+DB_ENDPOINT=$(terraform output -raw db_endpoint)
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!' -e "SELECT 1;"
+```
+
+**Validation Checkpoints:**
+- Database connection successful
+- App-DB integration works
+
+## Test Step 9.3: Test Security Isolation
+**Action:**
+```bash
+# These should fail:
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!'  # From local
+curl http://$APP_IP:8080  # Direct to instance
+```
+
+**Validation Checkpoints:**
+- Direct access blocked
+- NAT Gateway provides outbound access

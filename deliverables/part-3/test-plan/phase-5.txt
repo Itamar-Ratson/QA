@@ -1,0 +1,81 @@
+# Phase 5: Security Group Configuration
+
+## Test Step 5.1: Add Security Groups
+**Action:**
+1. Create `security-groups.tf`:
+   ```hcl
+   resource "aws_security_group" "alb" {
+     name_prefix = "alb-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port   = 80
+       to_port     = 80
+       protocol    = "tcp"
+       cidr_blocks = ["0.0.0.0/0"]
+     }
+     
+     egress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "alb-sg" }
+   }
+   
+   resource "aws_security_group" "application" {
+     name_prefix = "application-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.alb.id]
+     }
+     
+     egress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.database.id]
+     }
+     
+     tags = { Name = "application-sg" }
+   }
+   
+   resource "aws_security_group" "database" {
+     name_prefix = "database-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "database-sg" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 security groups created
+- Proper tier isolation configured
+
+**Expected Results:**
+- ALB allows HTTP from internet
+- App tier isolated to ALB traffic
+- DB tier isolated to app traffic
+
+**Rollback Procedure:**
+```bash
+terraform destroy -auto-approve
+```
