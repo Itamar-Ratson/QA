@@ -34,3 +34,4 @@ env/
 !*.conf
 !*.tf
 !*.go
+!*.odt
