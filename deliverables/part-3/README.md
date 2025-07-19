@@ -1,0 +1,832 @@
+# Test Strategy Document: Multi-Tier Application Deployment
+
+## Testing Approach Overview
+
+This document outlines the testing strategy for validating a 3-tier web application deployment using VPC infrastructure.
+
+**Testing Methodology**: Bottom-up testing approach where infrastructure components are validated individually before testing integrated functionality (infrastructure → network → application), ensuring each layer functions correctly before building upon it.
+
+## Test Objectives and Scope
+
+### Primary Objectives
+- **Infrastructure Validation**: Verify all VPC components are correctly provisioned and configured
+- **Network Connectivity**: Ensure proper traffic flow between all tiers with intended restrictions
+- **Security Compliance**: Validate network isolation and security group effectiveness
+- **Performance Baseline**: Establish performance metrics for the deployed architecture
+- **Integration Verification**: Confirm seamless interaction between all application components
+
+### Scope
+- VPC creation and configuration (10.0.0.0/16 in us-east-1)
+- Subnet deployment and routing (public, private, database tiers)
+- Gateway configuration (Internet Gateway, NAT Gateway)
+- Security group implementation and rule validation
+- Application Load Balancer deployment and configuration
+- EC2 instance deployment in private subnet
+- RDS MySQL database setup in database subnet
+- End-to-end application functionality testing
+
+## Key Testing Scenarios
+
+### Infrastructure Provisioning Tests
+- **VPC Creation**: Validate VPC with correct CIDR block and region
+- **Subnet Configuration**: Verify three subnets with proper CIDR allocation
+- **Gateway Deployment**: Confirm IGW and NAT Gateway functionality
+- **Route Table Setup**: Validate routing rules for each subnet type
+
+### Network Connectivity Tests
+- **Public Tier Access**: Internet → ALB → Application servers
+- **Private Tier Communication**: ALB → Application servers → Database
+- **Outbound Access**: Application servers → Internet via NAT Gateway
+- **Internal Communication**: Application servers ↔ Database servers
+
+### Security Isolation Tests
+- **Tier Separation**: Verify no direct access between inappropriate tiers
+- **Security Group Rules**: Validate port restrictions and source limitations
+- **Database Isolation**: Confirm database accessible only from application tier
+- **Public Access Restrictions**: Ensure private resources remain private
+
+### Performance and Load Tests
+- **Connection Limits**: Test maximum concurrent connections
+- **Response Times**: Baseline latency between tiers
+- **Throughput Testing**: Database and application performance under load
+- **Auto-scaling Behavior**: If configured, test scaling triggers
+
+### Integration Validation Tests
+- **Application Deployment**: Full application stack functionality
+- **Database Connectivity**: Application → Database communication
+- **Load Balancer Health Checks**: ALB health check validation
+- **Session Management**: User session persistence across instances
+
+## Risk Assessment
+
+### High Risk Areas
+- Security Group Misconfiguration
+- Network Routing Issues
+- Database Connectivity Failure
+- Load Balancer Misconfiguration
+
+### Medium Risk Areas
+- NAT Gateway failure affecting outbound connectivity
+- Subnet CIDR conflicts during expansion
+- Performance degradation under load
+- SSL/TLS certificate issues
+
+### Low Risk Areas
+- VPC creation failure (well-tested AWS service)
+- Basic EC2 instance provisioning
+- RDS database creation
+
+## Success Criteria
+
+### Functional Success Criteria
+- **Complete Infrastructure Deployment**: All components provisioned without errors
+- **Network Connectivity**: 100% successful connectivity tests between appropriate tiers
+- **Security Validation**: Zero unauthorized access attempts succeed
+- **Application Functionality**: Full user workflow completion rate ≥ 99%
+- **Database Operations**: All CRUD operations execute successfully
+
+### Performance Success Criteria
+- **Response Time**: ALB → Application server latency < 100ms
+- **Database Queries**: Application → Database response < 200ms
+- **Throughput**: System handles 1000 concurrent users without degradation
+- **Availability**: 99.9% uptime during testing period
+
+### Security Success Criteria
+- **Access Control**: No successful unauthorized tier access
+- **Data Protection**: Database accessible only from application tier
+- **Traffic Encryption**: All inter-tier communication properly encrypted
+- **Compliance**: Security groups follow principle of least privilege
+
+### Integration Success Criteria
+- **End-to-End Workflow**: Complete user journey from web request to database response
+- **Load Distribution**: Traffic evenly distributed across application instances
+- **Health Monitoring**: All health checks return positive status
+- **Error Handling**: Graceful degradation when components are unavailable
+
+########################################################################################################################
+
+# Detailed Test Plan: 3-Tier Application Deployment
+
+## Test Execution Overview
+**Objective:** Validate end-to-end deployment of a 3-tier web application with proper network isolation and security controls  
+**Environment:** us-east-1 region  
+**Duration:** Estimated 4-6 hours  
+**Prerequisites:** Terraform installed, AWS CLI configured, appropriate IAM permissions, test application artifacts
+
+---
+
+## Phase 1: VPC Foundation Setup
+
+### Test Step 1.1: Create VPC Infrastructure
+**Action:**
+1. Initialize Terraform workspace:
+   ```bash
+   mkdir e2e-vpc-test && cd e2e-vpc-test
+   terraform init
+   ```
+2. Create `provider.tf`:
+   ```hcl
+   provider "aws" {
+     region = "us-east-1"
+   }
+   ```
+3. Create `vpc.tf`:
+   ```hcl
+   resource "aws_vpc" "main" {
+     cidr_block           = "10.0.0.0/16"
+     enable_dns_hostnames = true
+     enable_dns_support   = true
+     
+     tags = {
+       Name = "e2e-test-vpc"
+     }
+   }
+   
+   data "aws_availability_zones" "available" {
+     state = "available"
+   }
+   ```
+4. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- `terraform plan` shows 1 resource to add
+- VPC creation completes within 30 seconds
+- VPC ID available: `terraform output vpc_id`
+
+**Expected Results:**
+- VPC created with CIDR 10.0.0.0/16
+- DNS settings enabled
+
+### Test Step 1.2: Add Initial Outputs
+**Action:**
+1. Create `outputs.tf`:
+   ```hcl
+   output "vpc_id" {
+     value = aws_vpc.main.id
+   }
+   ```
+
+**Rollback Procedure:**
+```bash
+terraform destroy -auto-approve
+```
+
+---
+
+## Phase 2: Subnet Configuration
+
+### Test Step 2.1: Add Subnet Resources
+**Action:**
+1. Create `subnets.tf`:
+   ```hcl
+   resource "aws_subnet" "public" {
+     vpc_id                  = aws_vpc.main.id
+     cidr_block              = "10.0.1.0/24"
+     availability_zone       = data.aws_availability_zones.available.names[0]
+     map_public_ip_on_launch = true
+     
+     tags = { Name = "public-subnet" }
+   }
+   
+   resource "aws_subnet" "private" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.2.0/24"
+     availability_zone = data.aws_availability_zones.available.names[1]
+     
+     tags = { Name = "private-subnet" }
+   }
+   
+   resource "aws_subnet" "database" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.3.0/24"
+     availability_zone = data.aws_availability_zones.available.names[2]
+     
+     tags = { Name = "database-subnet" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 subnets created in different AZs
+- Public subnet auto-assigns public IPs
+
+**Expected Results:**
+- 3 subnet IDs available via outputs
+- Different AZs for high availability
+
+---
+
+## Phase 3: Internet Connectivity Setup
+
+### Test Step 3.1: Add Gateways
+**Action:**
+1. Create `gateways.tf`:
+   ```hcl
+   resource "aws_internet_gateway" "main" {
+     vpc_id = aws_vpc.main.id
+     tags = { Name = "e2e-test-igw" }
+   }
+   
+   resource "aws_eip" "nat" {
+     domain     = "vpc"
+     depends_on = [aws_internet_gateway.main]
+     tags = { Name = "e2e-nat-eip" }
+   }
+   
+   resource "aws_nat_gateway" "main" {
+     allocation_id = aws_eip.nat.id
+     subnet_id     = aws_subnet.public.id
+     depends_on    = [aws_internet_gateway.main]
+     tags = { Name = "e2e-test-nat" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- IGW attached to VPC
+- NAT Gateway available (3-5 min)
+
+**Expected Results:**
+- IGW and NAT ready for routing
+
+---
+
+## Phase 4: Route Table Configuration
+
+### Test Step 4.1: Add Route Tables
+**Action:**
+1. Create `routing.tf`:
+   ```hcl
+   resource "aws_route_table" "public" {
+     vpc_id = aws_vpc.main.id
+     route {
+       cidr_block = "0.0.0.0/0"
+       gateway_id = aws_internet_gateway.main.id
+     }
+     tags = { Name = "public-rt" }
+   }
+   
+   resource "aws_route_table" "private" {
+     vpc_id = aws_vpc.main.id
+     route {
+       cidr_block     = "0.0.0.0/0"
+       nat_gateway_id = aws_nat_gateway.main.id
+     }
+     tags = { Name = "private-rt" }
+   }
+   
+   resource "aws_route_table" "database" {
+     vpc_id = aws_vpc.main.id
+     tags = { Name = "database-rt" }
+   }
+   
+   resource "aws_route_table_association" "public" {
+     subnet_id      = aws_subnet.public.id
+     route_table_id = aws_route_table.public.id
+   }
+   
+   resource "aws_route_table_association" "private" {
+     subnet_id      = aws_subnet.private.id
+     route_table_id = aws_route_table.private.id
+   }
+   
+   resource "aws_route_table_association" "database" {
+     subnet_id      = aws_subnet.database.id
+     route_table_id = aws_route_table.database.id
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 6 new resources (3 route tables + 3 associations)
+- Correct routing configuration
+
+**Expected Results:**
+- Public routes to IGW
+- Private routes to NAT
+- Database isolated
+
+---
+
+## Phase 5: Security Group Configuration
+
+### Test Step 5.1: Add Security Groups
+**Action:**
+1. Create `security-groups.tf`:
+   ```hcl
+   resource "aws_security_group" "alb" {
+     name_prefix = "alb-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port   = 80
+       to_port     = 80
+       protocol    = "tcp"
+       cidr_blocks = ["0.0.0.0/0"]
+     }
+     
+     egress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "alb-sg" }
+   }
+   
+   resource "aws_security_group" "application" {
+     name_prefix = "application-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.alb.id]
+     }
+     
+     egress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.database.id]
+     }
+     
+     tags = { Name = "application-sg" }
+   }
+   
+   resource "aws_security_group" "database" {
+     name_prefix = "database-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "database-sg" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 security groups created
+- Proper tier isolation configured
+
+**Expected Results:**
+- ALB allows HTTP from internet
+- App tier isolated to ALB traffic
+- DB tier isolated to app traffic
+
+---
+
+## Phase 6: Load Balancer Deployment
+
+### Test Step 6.1: Add ALB
+**Action:**
+1. Create `alb.tf`:
+   ```hcl
+   resource "aws_lb" "main" {
+     name               = "e2e-test-alb"
+     internal           = false
+     load_balancer_type = "application"
+     security_groups    = [aws_security_group.alb.id]
+     subnets            = [aws_subnet.public.id, aws_subnet.private.id]
+     
+     tags = { Name = "e2e-test-alb" }
+   }
+   
+   resource "aws_lb_target_group" "app" {
+     name     = "app-targets"
+     port     = 8080
+     protocol = "HTTP"
+     vpc_id   = aws_vpc.main.id
+     
+     health_check {
+       enabled             = true
+       healthy_threshold   = 2
+       path                = "/health"
+       timeout             = 5
+       unhealthy_threshold = 2
+     }
+     
+     tags = { Name = "app-targets" }
+   }
+   
+   resource "aws_lb_listener" "app" {
+     load_balancer_arn = aws_lb.main.arn
+     port              = "80"
+     protocol          = "HTTP"
+     
+     default_action {
+       type             = "forward"
+       target_group_arn = aws_lb_target_group.app.arn
+     }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- ALB state "active" (2-3 min)
+- Target group ready
+
+**Expected Results:**
+- ALB DNS name available
+- Health check configured
+
+---
+
+## Phase 7: Application Instance Deployment
+
+### Test Step 7.1: Add Instances
+**Action:**
+1. Create `instances.tf`:
+   ```hcl
+   data "aws_ami" "amazon_linux" {
+     most_recent = true
+     owners      = ["amazon"]
+     filter {
+       name   = "name"
+       values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+     }
+   }
+   
+   resource "aws_instance" "app" {
+     count                  = 2
+     ami                    = data.aws_ami.amazon_linux.id
+     instance_type          = "t3.micro"
+     subnet_id              = aws_subnet.private.id
+     vpc_security_group_ids = [aws_security_group.application.id]
+     
+     user_data = base64encode(<<-EOF
+       #!/bin/bash
+       yum update -y
+       yum install -y httpd
+       systemctl start httpd
+       systemctl enable httpd
+       echo "<h1>App Server ${count.index + 1}</h1>" > /var/www/html/index.html
+       echo "OK" > /var/www/html/health
+       EOF
+     )
+     
+     tags = { Name = "app-server-${count.index + 1}" }
+   }
+   
+   resource "aws_lb_target_group_attachment" "app" {
+     count            = 2
+     target_group_arn = aws_lb_target_group.app.arn
+     target_id        = aws_instance.app[count.index].id
+     port             = 8080
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 2 instances in private subnet
+- Target group registration
+
+**Expected Results:**
+- Health checks pass (5 min)
+
+### Test Step 7.2: Add Instance Outputs
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "app_instance_ids" {
+     value = aws_instance.app[*].id
+   }
+   ```
+
+---
+
+## Phase 8: Database Setup
+
+### Test Step 8.1: Add RDS Database
+**Action:**
+1. Create `rds.tf`:
+   ```hcl
+   resource "aws_db_subnet_group" "main" {
+     name       = "e2e-db-subnet-group"
+     subnet_ids = [aws_subnet.database.id, aws_subnet.private.id]
+     
+     tags = { Name = "e2e-db-subnet-group" }
+   }
+   
+   resource "aws_db_instance" "main" {
+     identifier           = "e2e-mysql-db"
+     engine               = "mysql"
+     engine_version       = "8.0"
+     instance_class       = "db.t3.micro"
+     allocated_storage    = 20
+     
+     db_name  = "e2edb"
+     username = "admin"
+     password = "changeme123!"
+     
+     vpc_security_group_ids = [aws_security_group.database.id]
+     db_subnet_group_name   = aws_db_subnet_group.main.name
+     
+     publicly_accessible = false
+     skip_final_snapshot = true
+     
+     tags = { Name = "e2e-mysql-db" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- RDS creation completes (15-20 min)
+- Not publicly accessible
+
+**Expected Results:**
+- Database endpoint available
+
+### Test Step 8.2: Add Database Output
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "db_endpoint" {
+     value = aws_db_instance.main.endpoint
+   }
+   ```
+
+---
+
+## Phase 9: End-to-End Testing
+
+### Test Step 9.1: Test Public Access
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+curl -I http://$ALB_DNS
+curl http://$ALB_DNS
+for i in {1..10}; do curl -s http://$ALB_DNS | grep "App Server"; done
+```
+
+**Validation Checkpoints:**
+- HTTP 200 responses
+- Load balancing works
+
+### Test Step 9.2: Test Database Connectivity  
+**Action:**
+```bash
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ssm start-session --target $INSTANCE_ID
+# On instance:
+DB_ENDPOINT=$(terraform output -raw db_endpoint)
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!' -e "SELECT 1;"
+```
+
+**Validation Checkpoints:**
+- Database connection successful
+- App-DB integration works
+
+### Test Step 9.3: Test Security Isolation
+**Action:**
+```bash
+# These should fail:
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!'  # From local
+curl http://$APP_IP:8080  # Direct to instance
+```
+
+**Validation Checkpoints:**
+- Direct access blocked
+- NAT Gateway provides outbound access
+
+---
+
+## Phase 10: Performance Testing
+
+### Test Step 10.1: Load Testing
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+# Load test with 50 concurrent connections
+ab -n 1000 -c 50 http://$ALB_DNS/
+```
+
+**Validation Checkpoints:**
+- Handles 50 concurrent users
+- Response times < 2 seconds
+
+### Test Step 10.2: Failover Testing
+**Action:**
+```bash
+# Stop one instance
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ec2 stop-instances --instance-ids $INSTANCE_ID
+
+# Verify traffic continues
+for i in {1..10}; do curl -s http://$ALB_DNS; sleep 2; done
+```
+
+**Validation Checkpoints:**
+- ALB detects unhealthy instance
+- No service interruption
+
+---
+
+## Final Cleanup
+
+### Test Step 11.1: Infrastructure Cleanup
+**Action:**
+```bash
+terraform destroy -auto-approve
+rm -rf .terraform terraform.tfstate*
+```
+
+**Validation Checkpoints:**
+- All resources deleted
+- No residual charges
+
+---
+
+## File Structure Summary
+
+```
+e2e-vpc-test/
+├── provider.tf
+├── vpc.tf
+├── subnets.tf
+├── gateways.tf
+├── routing.tf
+├── security-groups.tf
+├── alb.tf
+├── instances.tf
+├── rds.tf
+└── outputs.tf
+```
+
+---
+
+## Final Validation and Cleanup
+
+### Test Step 11.1: Complete System Validation
+**Action:**
+1. Run comprehensive validation script:
+   ```bash
+   #!/bin/bash
+   set -e
+   
+   echo "=== Infrastructure Validation ==="
+   terraform validate
+   terraform plan -detailed-exitcode
+   
+   echo "=== Connectivity Tests ==="
+   ALB_DNS=$(terraform output -raw alb_dns_name)
+   curl -f http://$ALB_DNS || exit 1
+   
+   echo "=== Security Tests ==="
+   # Verify database is not publicly accessible
+   DB_ENDPOINT=$(terraform output -raw db_endpoint)
+   timeout 5 mysql -h $DB_ENDPOINT -u admin -p'changeme123!' 2>&1 | grep -q "timeout\|refused" || exit 1
+   
+   echo "=== All tests passed ==="
+   ```
+2. Generate test report:
+   ```bash
+   terraform show -json > infrastructure-state.json
+   terraform output -json > infrastructure-outputs.json
+   ```
+
+**Validation Checkpoints:**
+- All requirements implemented
+- No terraform validation errors
+- System passes security tests
+- Documentation complete
+
+**Expected Results:**
+- Fully functional 3-tier application
+- All test objectives achieved
+- System meets performance requirements
+
+### Test Step 11.2: Infrastructure Cleanup
+**Action:**
+1. Destroy all resources:
+   ```bash
+   terraform plan -destroy
+   terraform destroy -auto-approve
+   ```
+2. Verify complete cleanup:
+   ```bash
+   terraform show  # Should show no resources
+   aws ec2 describe-vpcs --filters "Name=tag:Name,Values=e2e-test-vpc"  # Should be empty
+   ```
+3. Clean local artifacts:
+   ```bash
+   rm -rf .terraform/
+   rm terraform.tfstate*
+   rm *.json
+   ```
+
+**Validation Checkpoints:**
+- All AWS resources deleted
+- No residual charges
+- Local state files cleaned
+- Workspace ready for next test
+
+**Expected Results:**
+- Clean environment
+- No unnecessary AWS charges
+- Complete test artifact removal
+
+########################################################################################################################
+
+# Testing Considerations: Multi-Tier Application Deployment
+
+## Network Connectivity Between Tiers
+
+**Testing Approach:**
+- Verify routing between public subnet (ALB), private subnet (app servers), and database subnet
+- Test connectivity paths: Internet → ALB → App Servers → Database
+- Validate NAT Gateway provides outbound access for private subnet
+- Confirm cross-AZ communication within the VPC
+
+**Validation Methods:**
+- Telnet/nc testing for specific ports (80, 8080, 3306)
+- Traceroute to verify routing paths
+- DNS resolution testing between tiers
+- Network latency measurement between components
+
+---
+
+## Security Isolation Verification
+
+**Testing Approach:**
+- Validate security group rules enforce proper tier isolation
+- Confirm database is only accessible from application tier
+- Verify no direct internet access to private resources
+- Test unauthorized access attempts fail appropriately
+
+**Validation Methods:**
+- Attempt direct database connection from internet (should fail)
+- Test application server access bypassing ALB (should fail)  
+- Port scanning from unauthorized sources
+- Security group rule validation against requirements
+
+---
+
+## Performance and Scalability Aspects
+
+**Testing Approach:**
+- Establish performance baselines for each tier
+- Test system behavior under increasing load
+- Validate load balancer distributes traffic effectively
+- Measure response times and throughput limits
+
+**Validation Methods:**
+- Load testing with Apache Bench (ab) for HTTP traffic
+- Database connection and query performance testing
+- Concurrent user simulation up to expected capacity
+- Resource utilization monitoring during load tests
+
+---
+
+## Integration Points with Other Services
+
+**Testing Approach:**
+- Verify ALB health checks function correctly
+- Test application-to-database connectivity and transactions
+- Validate monitoring and logging integration
+- Confirm infrastructure provisioning consistency
+
+**Validation Methods:**
+- ALB target health status verification
+- Database connection pooling and transaction testing
+- CloudWatch metrics collection validation
+- Terraform deployment repeatability testing
