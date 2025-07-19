@@ -147,7 +147,7 @@
 - Response times <2 seconds
 - No security breaches
 
-## Simplified Test Plan
+## Test Plan
 
 ### Phase 1: VPC Setup
 ```bash
