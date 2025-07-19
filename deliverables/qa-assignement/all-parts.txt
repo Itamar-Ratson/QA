@@ -1,0 +1,1797 @@
+# VPC Creation - Comprehensive Test Cases
+
+##################################################
+## Positive/Happy Path Scenarios
+
+### TC-001
+**Test Case ID:** TC-001  
+**Test Case Description:** Create VPC with valid inputs and default settings  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "test-vpc-01"
+3. Enter CIDR block: "10.0.0.0/16"
+4. Select region: "us-east-1"
+5. Leave DNS options as default
+6. Click "Create VPC"
+
+**Expected Results:** VPC created successfully, confirmation message displayed, VPC appears in VPC list  
+**Priority:** High  
+**Category:** Functional
+
+### TC-002
+**Test Case ID:** TC-002  
+**Test Case Description:** Create VPC with DNS resolution enabled  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "dns-enabled-vpc"
+3. Enter CIDR block: "172.16.0.0/16"
+4. Select region: "us-west-2"
+5. Enable "DNS resolution"
+6. Click "Create VPC"
+
+**Expected Results:** VPC created with DNS resolution enabled, instances can resolve domain names  
+**Priority:** High  
+**Category:** Functional
+
+### TC-003
+**Test Case ID:** TC-003  
+**Test Case Description:** Create VPC with different private IP range (172.x.x.x)  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "private-range-vpc"
+3. Enter CIDR block: "172.16.0.0/16"
+4. Select region: "us-west-1"
+5. Leave DNS options as default
+6. Click "Create VPC"
+
+**Expected Results:** VPC created successfully with 172.16.0.0/16 private IP range  
+**Priority:** High  
+**Category:** Functional
+
+##################################################
+## Boundary Value Testing
+
+### TC-004
+**Test Case ID:** TC-004  
+**Test Case Description:** Create VPC with minimum CIDR block size (/28)  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "min-cidr-vpc"
+3. Enter CIDR block: "10.0.0.0/28"
+4. Select region: "us-east-1"
+5. Click "Create VPC"
+
+**Expected Results:** VPC created successfully with /28 CIDR block  
+**Priority:** High  
+**Category:** Functional
+
+### TC-005
+**Test Case ID:** TC-005  
+**Test Case Description:** Create VPC with maximum CIDR block size (/16)  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "max-cidr-vpc"
+3. Enter CIDR block: "10.0.0.0/16"
+4. Select region: "us-east-1"
+5. Click "Create VPC"
+
+**Expected Results:** VPC created successfully with /16 CIDR block  
+**Priority:** High  
+**Category:** Functional
+
+### TC-006
+**Test Case ID:** TC-006  
+**Test Case Description:** Create 5th VPC in region (account limit)  
+**Pre-conditions:** User logged in, 4 VPCs already exist in target region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "fifth-vpc"
+3. Enter CIDR block: "10.5.0.0/16"
+4. Select region with 4 existing VPCs
+5. Click "Create VPC"
+
+**Expected Results:** 5th VPC created successfully, reaching account limit  
+**Priority:** High  
+**Category:** Functional
+
+##################################################
+## Negative Testing Scenarios
+
+### TC-007
+**Test Case ID:** TC-007  
+**Test Case Description:** Attempt to create VPC with CIDR block smaller than /28  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "invalid-cidr-vpc"
+3. Enter CIDR block: "10.0.0.0/29"
+4. Select region: "us-east-1"
+5. Click "Create VPC"
+
+**Expected Results:** Error message displayed: "CIDR block must be between /16 and /28"  
+**Priority:** High  
+**Category:** Functional
+
+### TC-008
+**Test Case ID:** TC-008  
+**Test Case Description:** Attempt to create VPC with overlapping CIDR block  
+**Pre-conditions:** User logged in, existing VPC with CIDR 10.0.0.0/16 in region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "overlapping-vpc"
+3. Enter CIDR block: "10.0.1.0/24"
+4. Select same region as existing VPC
+5. Click "Create VPC"
+
+**Expected Results:** Error message displayed: "CIDR block overlaps with existing VPC"  
+**Priority:** High  
+**Category:** Functional
+
+### TC-009
+**Test Case ID:** TC-009  
+**Test Case Description:** Attempt to create 6th VPC in region (exceed limit)  
+**Pre-conditions:** User logged in, 5 VPCs already exist in target region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "sixth-vpc"
+3. Enter CIDR block: "10.6.0.0/16"
+4. Select region with 5 existing VPCs
+5. Click "Create VPC"
+
+**Expected Results:** Error message displayed: "Account limit of 5 VPCs per region exceeded"  
+**Priority:** High  
+**Category:** Functional
+
+##################################################
+## Edge Cases
+
+### TC-010
+**Test Case ID:** TC-010  
+**Test Case Description:** Create VPC with network interruption during creation  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter valid VPC details
+3. Click "Create VPC"
+4. Simulate network interruption during creation
+5. Restore network connection
+
+**Expected Results:** System handles interruption gracefully, either completes creation or shows appropriate error with retry option  
+**Priority:** Medium  
+**Category:** Functional
+
+### TC-011
+**Test Case ID:** TC-011  
+**Test Case Description:** Create VPC with special characters in name (valid ones)  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Navigate to VPC creation form
+2. Enter VPC name: "test-vpc_with-valid_chars"
+3. Enter CIDR block: "10.0.0.0/16"
+4. Select region: "us-east-1"
+5. Click "Create VPC"
+
+**Expected Results:** VPC created successfully with hyphens and underscores in name  
+**Priority:** Medium  
+**Category:** Functional
+
+### TC-012
+**Test Case ID:** TC-012  
+**Test Case Description:** Create VPC with all three private IP ranges  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Create VPC with CIDR: "10.0.0.0/16"
+2. Create VPC with CIDR: "172.16.0.0/16"
+3. Create VPC with CIDR: "192.168.0.0/16"
+4. All in same region
+
+**Expected Results:** All three VPCs created successfully using different private IP ranges  
+**Priority:** Medium  
+**Category:** Functional
+
+##################################################
+## Integration Scenarios
+
+### TC-013
+**Test Case ID:** TC-013  
+**Test Case Description:** Concurrent VPC creation by multiple users  
+**Pre-conditions:** Multiple users logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. User A starts VPC creation with CIDR: "10.1.0.0/16"
+2. User B simultaneously starts VPC creation with CIDR: "10.2.0.0/16"
+3. Both users submit forms at same time
+4. Monitor creation process
+
+**Expected Results:** Both VPCs created successfully without conflicts  
+**Priority:** High  
+**Category:** Integration
+
+### TC-014
+**Test Case ID:** TC-014  
+**Test Case Description:** Create VPC across different regions  
+**Pre-conditions:** User logged in, access to multiple regions  
+**Test Steps:**
+1. Create VPC in us-east-1 with CIDR: "10.0.0.0/16"
+2. Create VPC in us-west-2 with CIDR: "10.0.0.0/16"
+3. Verify both VPCs exist independently
+
+**Expected Results:** Same CIDR blocks allowed in different regions  
+**Priority:** Medium  
+**Category:** Integration
+
+### TC-015
+**Test Case ID:** TC-015  
+**Test Case Description:** VPC creation with subnet and security group integration  
+**Pre-conditions:** User logged in, less than 5 VPCs in selected region  
+**Test Steps:**
+1. Create VPC with CIDR: "10.0.0.0/16"
+2. Create subnet within VPC with CIDR: "10.0.1.0/24"
+3. Create security group associated with VPC
+4. Verify all components reference the same VPC ID
+
+**Expected Results:** Subnet and security group successfully created and associated with VPC  
+**Priority:** High  
+**Category:** Integration
+# Bug Report: VPC Creation Sometimes Fails
+
+## Bug Details
+
+**Bug ID:** VPC-001  
+**Bug Title:** Intermittent VPC Creation Failure with CIDR 10.0.0.0/16  
+**Reporter:** QA Team  
+**Date:** July 17, 2025  
+**Environment:** Staging environment, us-east-1 region
+
+## Description
+VPC creation with CIDR block 10.0.0.0/16 fails intermittently, displaying generic error message "Creation failed - please try again" with no specific error details.
+
+## Steps to Reproduce
+1. Navigate to VPC creation form
+2. Enter VPC name (e.g., "test-vpc")
+3. Input CIDR block: 10.0.0.0/16
+4. Select region: us-east-1
+5. Configure DNS settings (any configuration)
+6. Click "Create VPC"
+7. Observe intermittent failure
+
+## Expected Behavior
+- VPC should be created successfully every time with valid parameters
+- If creation fails, specific error message should be displayed
+- Creation should complete within 30 seconds as per requirements
+
+## Actual Behavior
+- VPC creation fails intermittently (not consistently)
+- Generic error message displayed: "Creation failed - please try again"
+- No specific error details provided to user
+- Issue appears more frequently during peak hours
+
+## Environment Details
+- **Environment:** Staging
+- **Region:** us-east-1
+- **Users Affected:** 3 confirmed reports
+- **Frequency:** Intermittent
+- **Peak Hours Correlation:** Yes
+
+## Severity Assessment
+**HIGH** - This impacts core functionality and user experience
+
+## Priority Recommendation
+**HIGH** - Should be addressed before production release
+
+## Additional Evidence
+- Multiple user reports (3 confirmed cases)
+- Peak hour correlation suggests load-related issue
+- No specific error logging visible to users
+
+---
+
+## Investigation Analysis
+
+### Potential Root Causes
+1. **Race Condition:** Concurrent VPC creation requests may cause resource conflicts
+2. **Database Lock Issues:** Peak hour loads causing database timeouts
+3. **Resource Allocation:** Infrastructure capacity issues during high load
+4. **Network Latency:** Timeout during VPC provisioning process
+5. **Validation Logic:** Backend validation failing after UI validation passes
+
+### Areas of System Affected
+- VPC creation service/API
+- Database layer (VPC resource allocation)
+- Load balancing and scaling mechanisms
+- Error handling and logging systems
+- User notification system
+
+### Verification Testing Suggestions
+1. **Load Testing:** Simulate peak hour conditions to reproduce consistently
+2. **Concurrent Testing:** Test multiple simultaneous VPC creation requests
+3. **Database Monitoring:** Monitor database locks and timeouts during creation
+4. **Log Analysis:** Review backend logs for specific error patterns
+5. **Network Monitoring:** Check for timeout issues in VPC provisioning
+
+### Risk Assessment if Left Unfixed
+- **User Experience:** Poor user confidence in platform reliability
+- **Business Impact:** Potential customer churn due to unreliable core feature
+- **Support Overhead:** Increased support tickets and manual intervention
+- **Reputation Risk:** Negative impact on product reliability perception
+- **Operational Risk:** Manual workarounds may be needed in production
+
+### Recommendations
+1. Implement detailed error logging and user-friendly error messages
+2. Add retry mechanism with exponential backoff
+3. Investigate database performance during peak hours
+4. Implement proper load testing before production deployment
+5. Add monitoring and alerting for VPC creation failures
+# Bug Report: DNS Settings Not Working
+
+######################################################################################################################################################
+
+## Bug Details
+
+**Bug ID:** VPC-002  
+**Bug Title:** DNS Resolution Not Functioning Despite Being Enabled During VPC Creation  
+**Reporter:** QA Team  
+**Date:** July 17, 2025  
+**Environment:** Staging environment, us-west-2 region
+
+## Description
+DNS resolution fails for instances within VPC despite DNS resolution being enabled during VPC creation. Domain name queries fail even though VPC creation was successful and DNS settings appear correctly configured.
+
+## Steps to Reproduce
+1. Navigate to VPC creation form
+2. Enter VPC name (e.g., "dns-test-vpc")
+3. Input valid CIDR block (e.g., 10.0.0.0/16)
+4. Select region: us-west-2
+5. Enable "DNS resolution" option
+6. Click "Create VPC" - VPC creates successfully
+7. Launch instances within the VPC
+8. Attempt DNS queries from instances (e.g., nslookup google.com)
+9. Observe DNS resolution failure
+
+## Expected Behavior
+- DNS resolution should work for instances within VPC when DNS resolution is enabled
+- Domain names should resolve to IP addresses
+- Both internal and external DNS queries should function
+- DNS hostnames should be resolvable if enabled
+
+## Actual Behavior
+- VPC creation succeeds with DNS resolution enabled
+- Instances launch successfully within VPC
+- DNS queries fail from instances
+- Domain names cannot be resolved
+- No clear error indication during VPC creation process
+
+## Environment Details
+- **Environment:** Staging
+- **Region:** us-west-2
+- **VPC Creation:** Successful
+- **Instance Launch:** Successful
+- **DNS Resolution:** Enabled during creation
+- **DNS Hostnames:** Status unknown
+
+## Severity Assessment
+**HIGH** - Critical functionality failure affecting instance connectivity
+
+## Priority Recommendation
+**HIGH** - Blocks normal instance operations and network functionality
+
+## Additional Evidence
+- VPC shows as successfully created
+- DNS resolution setting appears enabled in VPC configuration
+- All other VPC functionality works normally
+- Issue specific to DNS resolution functionality
+
+---
+
+## Investigation Analysis
+
+### Potential Root Causes
+1. **DNS Service Configuration:** DNS resolver service not properly configured for VPC
+2. **Route Table Issues:** Missing routes to DNS servers (169.254.169.253)
+3. **Security Group Rules:** Blocking DNS traffic (port 53 UDP/TCP)
+4. **DHCP Options:** Incorrect or missing DHCP option sets for DNS servers
+5. **Backend Service:** DNS resolution service not properly linked to VPC
+6. **Regional Issue:** DNS service malfunction specific to us-west-2
+
+### Areas of System Affected
+- DNS resolution service
+- VPC networking configuration
+- DHCP options management
+- Route table configuration
+- Instance networking stack
+- Regional DNS infrastructure
+
+### Verification Testing Suggestions
+1. **DNS Server Reachability:** Test connectivity to 169.254.169.253 from instances
+2. **DHCP Options Check:** Verify DHCP option sets assigned to VPC
+3. **Route Table Analysis:** Check for DNS resolver routes in VPC route tables
+4. **Security Group Audit:** Verify DNS ports (53) are not blocked
+5. **Regional Testing:** Test DNS functionality in other regions
+6. **Instance Network Config:** Check /etc/resolv.conf on instances
+7. **VPC Configuration Validation:** Verify DNS settings are properly applied
+
+### Risk Assessment if Left Unfixed
+- **Operational Impact:** Instances cannot resolve domain names, breaking applications
+- **User Experience:** Complete DNS functionality failure
+- **Business Impact:** Applications dependent on DNS resolution will fail
+- **Support Overhead:** Users cannot use instances effectively
+- **Reputation Risk:** Core networking feature non-functional
+- **Security Risk:** Potential workarounds may introduce vulnerabilities
+
+### Recommendations
+1. **Immediate:** Verify DNS resolver service status in us-west-2
+2. **Configuration Check:** Audit DHCP options and route table configurations
+3. **Regional Testing:** Test DNS functionality across all regions
+4. **Monitoring:** Implement DNS resolution monitoring for VPCs
+5. **Documentation:** Update troubleshooting guides for DNS issues
+6. **Validation:** Add automated tests for DNS functionality post-VPC creation
+# Bug Report: CIDR Validation Inconsistency
+
+######################################################################################################################################################
+
+## Bug Details
+
+**Bug ID:** VPC-003  
+**Bug Title:** UI Accepts Invalid CIDR Block That Backend Rejects  
+**Reporter:** QA Team  
+**Date:** July 17, 2025  
+**Environment:** Both staging and production
+
+## Description
+System accepts CIDR block 10.0.0.0/15 in UI real-time validation but fails during backend creation process, creating inconsistent validation experience between frontend and backend.
+
+## Steps to Reproduce
+1. Navigate to VPC creation form
+2. Enter VPC name (e.g., "cidr-test-vpc")
+3. Input CIDR block: 10.0.0.0/15
+4. Select any region
+5. Configure DNS settings (any configuration)
+6. Observe UI validation passes (no error shown)
+7. Click "Create VPC"
+8. Observe backend validation failure after form submission
+
+## Expected Behavior
+- UI validation should reject CIDR blocks outside /16 to /28 range
+- Backend and frontend validation should be consistent
+- User should receive immediate feedback for invalid CIDR
+- No form submission should occur with invalid CIDR
+
+## Actual Behavior
+- UI real-time validation accepts 10.0.0.0/15 (invalid per requirements)
+- Form submission proceeds successfully
+- Backend validation fails after submission
+- User experiences delayed error feedback
+- Inconsistent validation rules between UI and backend
+
+## Environment Details
+- **Environment:** Both staging and production
+- **CIDR Block:** 10.0.0.0/15 (invalid - outside /16 to /28 range)
+- **Validation Point:** UI passes, backend fails
+- **Error Timing:** Post-submission
+
+## Severity Assessment
+**MEDIUM** - Functional issue affecting user experience and validation consistency
+
+## Priority Recommendation
+**MEDIUM** - Should be fixed to maintain validation consistency and user experience
+
+## Additional Evidence
+- Requirements specify /16 to /28 CIDR range
+- /15 is larger than /16 minimum, therefore invalid
+- Issue occurs in both environments
+- Real-time validation logic differs from backend validation
+
+---
+
+## Investigation Analysis
+
+### Potential Root Causes
+1. **Validation Logic Mismatch:** Frontend and backend use different CIDR validation rules
+2. **Requirements Interpretation:** Frontend developer misunderstood CIDR range requirements
+3. **Code Synchronization:** Backend validation updated but frontend not synchronized
+4. **Regular Expression Error:** Frontend regex pattern incorrectly allows /15
+5. **Testing Gap:** Frontend validation not properly tested against requirements
+
+### Areas of System Affected
+- Frontend CIDR validation component
+- Backend CIDR validation service
+- Form submission workflow
+- User experience and error handling
+- Validation consistency across environments
+
+### Verification Testing Suggestions
+1. **Boundary Testing:** Test all CIDR ranges from /8 to /32 in UI
+2. **Backend Validation Audit:** Review backend validation rules for CIDR
+3. **Frontend Code Review:** Examine real-time validation logic
+4. **Cross-Environment Testing:** Verify issue exists in all environments
+5. **Requirements Validation:** Confirm CIDR range requirements (/16 to /28)
+6. **Regex Testing:** Test CIDR validation regular expressions
+
+### Risk Assessment if Left Unfixed
+- **User Experience:** Confusing validation behavior frustrates users
+- **Time Waste:** Users spend time on invalid configurations
+- **Support Overhead:** Increased support tickets for validation confusion
+- **Trust Issues:** Inconsistent validation reduces user confidence
+- **Development Risk:** Other validation inconsistencies may exist
+
+### Recommendations
+1. **Immediate:** Align frontend validation with backend requirements
+2. **Code Review:** Audit all validation logic for consistency
+3. **Testing:** Add comprehensive validation tests for boundary conditions
+4. **Documentation:** Update validation requirements documentation
+5. **Quality Process:** Implement validation consistency checks in CI/CD
+6. **User Feedback:** Improve error messages for validation failures
+# Test Strategy Document: Multi-Tier Application Deployment
+
+## Testing Approach Overview
+
+This document outlines the testing strategy for validating a 3-tier web application deployment using VPC infrastructure.
+
+**Testing Methodology**: Bottom-up testing approach where infrastructure components are validated individually before testing integrated functionality (infrastructure → network → application), ensuring each layer functions correctly before building upon it.
+
+## Test Objectives and Scope
+
+### Primary Objectives
+- **Infrastructure Validation**: Verify all VPC components are correctly provisioned and configured
+- **Network Connectivity**: Ensure proper traffic flow between all tiers with intended restrictions
+- **Security Compliance**: Validate network isolation and security group effectiveness
+- **Performance Baseline**: Establish performance metrics for the deployed architecture
+- **Integration Verification**: Confirm seamless interaction between all application components
+
+### Scope
+- VPC creation and configuration (10.0.0.0/16 in us-east-1)
+- Subnet deployment and routing (public, private, database tiers)
+- Gateway configuration (Internet Gateway, NAT Gateway)
+- Security group implementation and rule validation
+- Application Load Balancer deployment and configuration
+- EC2 instance deployment in private subnet
+- RDS MySQL database setup in database subnet
+- End-to-end application functionality testing
+
+## Key Testing Scenarios
+
+### Infrastructure Provisioning Tests
+- **VPC Creation**: Validate VPC with correct CIDR block and region
+- **Subnet Configuration**: Verify three subnets with proper CIDR allocation
+- **Gateway Deployment**: Confirm IGW and NAT Gateway functionality
+- **Route Table Setup**: Validate routing rules for each subnet type
+
+### Network Connectivity Tests
+- **Public Tier Access**: Internet → ALB → Application servers
+- **Private Tier Communication**: ALB → Application servers → Database
+- **Outbound Access**: Application servers → Internet via NAT Gateway
+- **Internal Communication**: Application servers ↔ Database servers
+
+### Security Isolation Tests
+- **Tier Separation**: Verify no direct access between inappropriate tiers
+- **Security Group Rules**: Validate port restrictions and source limitations
+- **Database Isolation**: Confirm database accessible only from application tier
+- **Public Access Restrictions**: Ensure private resources remain private
+
+### Performance and Load Tests
+- **Connection Limits**: Test maximum concurrent connections
+- **Response Times**: Baseline latency between tiers
+- **Throughput Testing**: Database and application performance under load
+- **Auto-scaling Behavior**: If configured, test scaling triggers
+
+### Integration Validation Tests
+- **Application Deployment**: Full application stack functionality
+- **Database Connectivity**: Application → Database communication
+- **Load Balancer Health Checks**: ALB health check validation
+- **Session Management**: User session persistence across instances
+
+## Risk Assessment
+
+### High Risk Areas
+- Security Group Misconfiguration
+- Network Routing Issues
+- Database Connectivity Failure
+- Load Balancer Misconfiguration
+
+### Medium Risk Areas
+- NAT Gateway failure affecting outbound connectivity
+- Subnet CIDR conflicts during expansion
+- Performance degradation under load
+- SSL/TLS certificate issues
+
+### Low Risk Areas
+- VPC creation failure (well-tested AWS service)
+- Basic EC2 instance provisioning
+- RDS database creation
+
+## Success Criteria
+
+### Functional Success Criteria
+- **Complete Infrastructure Deployment**: All components provisioned without errors
+- **Network Connectivity**: 100% successful connectivity tests between appropriate tiers
+- **Security Validation**: Zero unauthorized access attempts succeed
+- **Application Functionality**: Full user workflow completion rate ≥ 99%
+- **Database Operations**: All CRUD operations execute successfully
+
+### Performance Success Criteria
+- **Response Time**: ALB → Application server latency < 100ms
+- **Database Queries**: Application → Database response < 200ms
+- **Throughput**: System handles 1000 concurrent users without degradation
+- **Availability**: 99.9% uptime during testing period
+
+### Security Success Criteria
+- **Access Control**: No successful unauthorized tier access
+- **Data Protection**: Database accessible only from application tier
+- **Traffic Encryption**: All inter-tier communication properly encrypted
+- **Compliance**: Security groups follow principle of least privilege
+
+### Integration Success Criteria
+- **End-to-End Workflow**: Complete user journey from web request to database response
+- **Load Distribution**: Traffic evenly distributed across application instances
+- **Health Monitoring**: All health checks return positive status
+- **Error Handling**: Graceful degradation when components are unavailable
+
+########################################################################################################################
+
+# Detailed Test Plan: 3-Tier Application Deployment
+
+## Test Execution Overview
+**Objective:** Validate end-to-end deployment of a 3-tier web application with proper network isolation and security controls  
+**Environment:** us-east-1 region  
+**Duration:** Estimated 4-6 hours  
+**Prerequisites:** Terraform installed, AWS CLI configured, appropriate IAM permissions, test application artifacts
+
+---
+
+## Phase 1: VPC Foundation Setup
+
+### Test Step 1.1: Create VPC Infrastructure
+**Action:**
+1. Initialize Terraform workspace:
+   ```bash
+   mkdir e2e-vpc-test && cd e2e-vpc-test
+   terraform init
+   ```
+2. Create `provider.tf`:
+   ```hcl
+   provider "aws" {
+     region = "us-east-1"
+   }
+   ```
+3. Create `vpc.tf`:
+   ```hcl
+   resource "aws_vpc" "main" {
+     cidr_block           = "10.0.0.0/16"
+     enable_dns_hostnames = true
+     enable_dns_support   = true
+     
+     tags = {
+       Name = "e2e-test-vpc"
+     }
+   }
+   
+   data "aws_availability_zones" "available" {
+     state = "available"
+   }
+   ```
+4. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- `terraform plan` shows 1 resource to add
+- VPC creation completes within 30 seconds
+- VPC ID available: `terraform output vpc_id`
+
+**Expected Results:**
+- VPC created with CIDR 10.0.0.0/16
+- DNS settings enabled
+
+### Test Step 1.2: Add Initial Outputs
+**Action:**
+1. Create `outputs.tf`:
+   ```hcl
+   output "vpc_id" {
+     value = aws_vpc.main.id
+   }
+   ```
+
+**Rollback Procedure:**
+```bash
+terraform destroy -auto-approve
+```
+
+---
+
+## Phase 2: Subnet Configuration
+
+### Test Step 2.1: Add Subnet Resources
+**Action:**
+1. Create `subnets.tf`:
+   ```hcl
+   resource "aws_subnet" "public" {
+     vpc_id                  = aws_vpc.main.id
+     cidr_block              = "10.0.1.0/24"
+     availability_zone       = data.aws_availability_zones.available.names[0]
+     map_public_ip_on_launch = true
+     
+     tags = { Name = "public-subnet" }
+   }
+   
+   resource "aws_subnet" "private" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.2.0/24"
+     availability_zone = data.aws_availability_zones.available.names[1]
+     
+     tags = { Name = "private-subnet" }
+   }
+   
+   resource "aws_subnet" "database" {
+     vpc_id            = aws_vpc.main.id
+     cidr_block        = "10.0.3.0/24"
+     availability_zone = data.aws_availability_zones.available.names[2]
+     
+     tags = { Name = "database-subnet" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 subnets created in different AZs
+- Public subnet auto-assigns public IPs
+
+**Expected Results:**
+- 3 subnet IDs available via outputs
+- Different AZs for high availability
+
+---
+
+## Phase 3: Internet Connectivity Setup
+
+### Test Step 3.1: Add Gateways
+**Action:**
+1. Create `gateways.tf`:
+   ```hcl
+   resource "aws_internet_gateway" "main" {
+     vpc_id = aws_vpc.main.id
+     tags = { Name = "e2e-test-igw" }
+   }
+   
+   resource "aws_eip" "nat" {
+     domain     = "vpc"
+     depends_on = [aws_internet_gateway.main]
+     tags = { Name = "e2e-nat-eip" }
+   }
+   
+   resource "aws_nat_gateway" "main" {
+     allocation_id = aws_eip.nat.id
+     subnet_id     = aws_subnet.public.id
+     depends_on    = [aws_internet_gateway.main]
+     tags = { Name = "e2e-test-nat" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- IGW attached to VPC
+- NAT Gateway available (3-5 min)
+
+**Expected Results:**
+- IGW and NAT ready for routing
+
+---
+
+## Phase 4: Route Table Configuration
+
+### Test Step 4.1: Add Route Tables
+**Action:**
+1. Create `routing.tf`:
+   ```hcl
+   resource "aws_route_table" "public" {
+     vpc_id = aws_vpc.main.id
+     route {
+       cidr_block = "0.0.0.0/0"
+       gateway_id = aws_internet_gateway.main.id
+     }
+     tags = { Name = "public-rt" }
+   }
+   
+   resource "aws_route_table" "private" {
+     vpc_id = aws_vpc.main.id
+     route {
+       cidr_block     = "0.0.0.0/0"
+       nat_gateway_id = aws_nat_gateway.main.id
+     }
+     tags = { Name = "private-rt" }
+   }
+   
+   resource "aws_route_table" "database" {
+     vpc_id = aws_vpc.main.id
+     tags = { Name = "database-rt" }
+   }
+   
+   resource "aws_route_table_association" "public" {
+     subnet_id      = aws_subnet.public.id
+     route_table_id = aws_route_table.public.id
+   }
+   
+   resource "aws_route_table_association" "private" {
+     subnet_id      = aws_subnet.private.id
+     route_table_id = aws_route_table.private.id
+   }
+   
+   resource "aws_route_table_association" "database" {
+     subnet_id      = aws_subnet.database.id
+     route_table_id = aws_route_table.database.id
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 6 new resources (3 route tables + 3 associations)
+- Correct routing configuration
+
+**Expected Results:**
+- Public routes to IGW
+- Private routes to NAT
+- Database isolated
+
+---
+
+## Phase 5: Security Group Configuration
+
+### Test Step 5.1: Add Security Groups
+**Action:**
+1. Create `security-groups.tf`:
+   ```hcl
+   resource "aws_security_group" "alb" {
+     name_prefix = "alb-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port   = 80
+       to_port     = 80
+       protocol    = "tcp"
+       cidr_blocks = ["0.0.0.0/0"]
+     }
+     
+     egress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "alb-sg" }
+   }
+   
+   resource "aws_security_group" "application" {
+     name_prefix = "application-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 8080
+       to_port         = 8080
+       protocol        = "tcp"
+       security_groups = [aws_security_group.alb.id]
+     }
+     
+     egress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.database.id]
+     }
+     
+     tags = { Name = "application-sg" }
+   }
+   
+   resource "aws_security_group" "database" {
+     name_prefix = "database-sg"
+     vpc_id      = aws_vpc.main.id
+     
+     ingress {
+       from_port       = 3306
+       to_port         = 3306
+       protocol        = "tcp"
+       security_groups = [aws_security_group.application.id]
+     }
+     
+     tags = { Name = "database-sg" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 3 security groups created
+- Proper tier isolation configured
+
+**Expected Results:**
+- ALB allows HTTP from internet
+- App tier isolated to ALB traffic
+- DB tier isolated to app traffic
+
+---
+
+## Phase 6: Load Balancer Deployment
+
+### Test Step 6.1: Add ALB
+**Action:**
+1. Create `alb.tf`:
+   ```hcl
+   resource "aws_lb" "main" {
+     name               = "e2e-test-alb"
+     internal           = false
+     load_balancer_type = "application"
+     security_groups    = [aws_security_group.alb.id]
+     subnets            = [aws_subnet.public.id, aws_subnet.private.id]
+     
+     tags = { Name = "e2e-test-alb" }
+   }
+   
+   resource "aws_lb_target_group" "app" {
+     name     = "app-targets"
+     port     = 8080
+     protocol = "HTTP"
+     vpc_id   = aws_vpc.main.id
+     
+     health_check {
+       enabled             = true
+       healthy_threshold   = 2
+       path                = "/health"
+       timeout             = 5
+       unhealthy_threshold = 2
+     }
+     
+     tags = { Name = "app-targets" }
+   }
+   
+   resource "aws_lb_listener" "app" {
+     load_balancer_arn = aws_lb.main.arn
+     port              = "80"
+     protocol          = "HTTP"
+     
+     default_action {
+       type             = "forward"
+       target_group_arn = aws_lb_target_group.app.arn
+     }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- ALB state "active" (2-3 min)
+- Target group ready
+
+**Expected Results:**
+- ALB DNS name available
+- Health check configured
+
+---
+
+## Phase 7: Application Instance Deployment
+
+### Test Step 7.1: Add Instances
+**Action:**
+1. Create `instances.tf`:
+   ```hcl
+   data "aws_ami" "amazon_linux" {
+     most_recent = true
+     owners      = ["amazon"]
+     filter {
+       name   = "name"
+       values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+     }
+   }
+   
+   resource "aws_instance" "app" {
+     count                  = 2
+     ami                    = data.aws_ami.amazon_linux.id
+     instance_type          = "t3.micro"
+     subnet_id              = aws_subnet.private.id
+     vpc_security_group_ids = [aws_security_group.application.id]
+     
+     user_data = base64encode(<<-EOF
+       #!/bin/bash
+       yum update -y
+       yum install -y httpd
+       systemctl start httpd
+       systemctl enable httpd
+       echo "<h1>App Server ${count.index + 1}</h1>" > /var/www/html/index.html
+       echo "OK" > /var/www/html/health
+       EOF
+     )
+     
+     tags = { Name = "app-server-${count.index + 1}" }
+   }
+   
+   resource "aws_lb_target_group_attachment" "app" {
+     count            = 2
+     target_group_arn = aws_lb_target_group.app.arn
+     target_id        = aws_instance.app[count.index].id
+     port             = 8080
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- 2 instances in private subnet
+- Target group registration
+
+**Expected Results:**
+- Health checks pass (5 min)
+
+### Test Step 7.2: Add Instance Outputs
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "app_instance_ids" {
+     value = aws_instance.app[*].id
+   }
+   ```
+
+---
+
+## Phase 8: Database Setup
+
+### Test Step 8.1: Add RDS Database
+**Action:**
+1. Create `rds.tf`:
+   ```hcl
+   resource "aws_db_subnet_group" "main" {
+     name       = "e2e-db-subnet-group"
+     subnet_ids = [aws_subnet.database.id, aws_subnet.private.id]
+     
+     tags = { Name = "e2e-db-subnet-group" }
+   }
+   
+   resource "aws_db_instance" "main" {
+     identifier           = "e2e-mysql-db"
+     engine               = "mysql"
+     engine_version       = "8.0"
+     instance_class       = "db.t3.micro"
+     allocated_storage    = 20
+     
+     db_name  = "e2edb"
+     username = "admin"
+     password = "changeme123!"
+     
+     vpc_security_group_ids = [aws_security_group.database.id]
+     db_subnet_group_name   = aws_db_subnet_group.main.name
+     
+     publicly_accessible = false
+     skip_final_snapshot = true
+     
+     tags = { Name = "e2e-mysql-db" }
+   }
+   ```
+2. Execute:
+   ```bash
+   terraform plan
+   terraform apply -auto-approve
+   ```
+
+**Validation Checkpoints:**
+- RDS creation completes (15-20 min)
+- Not publicly accessible
+
+**Expected Results:**
+- Database endpoint available
+
+### Test Step 8.2: Add Database Output
+**Action:**
+1. Add to `outputs.tf`:
+   ```hcl
+   output "db_endpoint" {
+     value = aws_db_instance.main.endpoint
+   }
+   ```
+
+---
+
+## Phase 9: End-to-End Testing
+
+### Test Step 9.1: Test Public Access
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+curl -I http://$ALB_DNS
+curl http://$ALB_DNS
+for i in {1..10}; do curl -s http://$ALB_DNS | grep "App Server"; done
+```
+
+**Validation Checkpoints:**
+- HTTP 200 responses
+- Load balancing works
+
+### Test Step 9.2: Test Database Connectivity  
+**Action:**
+```bash
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ssm start-session --target $INSTANCE_ID
+# On instance:
+DB_ENDPOINT=$(terraform output -raw db_endpoint)
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!' -e "SELECT 1;"
+```
+
+**Validation Checkpoints:**
+- Database connection successful
+- App-DB integration works
+
+### Test Step 9.3: Test Security Isolation
+**Action:**
+```bash
+# These should fail:
+mysql -h $DB_ENDPOINT -u admin -p'changeme123!'  # From local
+curl http://$APP_IP:8080  # Direct to instance
+```
+
+**Validation Checkpoints:**
+- Direct access blocked
+- NAT Gateway provides outbound access
+
+---
+
+## Phase 10: Performance Testing
+
+### Test Step 10.1: Load Testing
+**Action:**
+```bash
+ALB_DNS=$(terraform output -raw alb_dns_name)
+# Load test with 50 concurrent connections
+ab -n 1000 -c 50 http://$ALB_DNS/
+```
+
+**Validation Checkpoints:**
+- Handles 50 concurrent users
+- Response times < 2 seconds
+
+### Test Step 10.2: Failover Testing
+**Action:**
+```bash
+# Stop one instance
+INSTANCE_ID=$(terraform output -raw app_instance_ids | jq -r '.[0]')
+aws ec2 stop-instances --instance-ids $INSTANCE_ID
+
+# Verify traffic continues
+for i in {1..10}; do curl -s http://$ALB_DNS; sleep 2; done
+```
+
+**Validation Checkpoints:**
+- ALB detects unhealthy instance
+- No service interruption
+
+---
+
+## Final Cleanup
+
+### Test Step 11.1: Infrastructure Cleanup
+**Action:**
+```bash
+terraform destroy -auto-approve
+rm -rf .terraform terraform.tfstate*
+```
+
+**Validation Checkpoints:**
+- All resources deleted
+- No residual charges
+
+---
+
+## File Structure Summary
+
+```
+e2e-vpc-test/
+├── provider.tf
+├── vpc.tf
+├── subnets.tf
+├── gateways.tf
+├── routing.tf
+├── security-groups.tf
+├── alb.tf
+├── instances.tf
+├── rds.tf
+└── outputs.tf
+```
+
+---
+
+## Final Validation and Cleanup
+
+### Test Step 11.1: Complete System Validation
+**Action:**
+1. Run comprehensive validation script:
+   ```bash
+   #!/bin/bash
+   set -e
+   
+   echo "=== Infrastructure Validation ==="
+   terraform validate
+   terraform plan -detailed-exitcode
+   
+   echo "=== Connectivity Tests ==="
+   ALB_DNS=$(terraform output -raw alb_dns_name)
+   curl -f http://$ALB_DNS || exit 1
+   
+   echo "=== Security Tests ==="
+   # Verify database is not publicly accessible
+   DB_ENDPOINT=$(terraform output -raw db_endpoint)
+   timeout 5 mysql -h $DB_ENDPOINT -u admin -p'changeme123!' 2>&1 | grep -q "timeout\|refused" || exit 1
+   
+   echo "=== All tests passed ==="
+   ```
+2. Generate test report:
+   ```bash
+   terraform show -json > infrastructure-state.json
+   terraform output -json > infrastructure-outputs.json
+   ```
+
+**Validation Checkpoints:**
+- All requirements implemented
+- No terraform validation errors
+- System passes security tests
+- Documentation complete
+
+**Expected Results:**
+- Fully functional 3-tier application
+- All test objectives achieved
+- System meets performance requirements
+
+### Test Step 11.2: Infrastructure Cleanup
+**Action:**
+1. Destroy all resources:
+   ```bash
+   terraform plan -destroy
+   terraform destroy -auto-approve
+   ```
+2. Verify complete cleanup:
+   ```bash
+   terraform show  # Should show no resources
+   aws ec2 describe-vpcs --filters "Name=tag:Name,Values=e2e-test-vpc"  # Should be empty
+   ```
+3. Clean local artifacts:
+   ```bash
+   rm -rf .terraform/
+   rm terraform.tfstate*
+   rm *.json
+   ```
+
+**Validation Checkpoints:**
+- All AWS resources deleted
+- No residual charges
+- Local state files cleaned
+- Workspace ready for next test
+
+**Expected Results:**
+- Clean environment
+- No unnecessary AWS charges
+- Complete test artifact removal
+
+########################################################################################################################
+
+# Testing Considerations: Multi-Tier Application Deployment
+
+## Network Connectivity Between Tiers
+
+**Testing Approach:**
+- Verify routing between public subnet (ALB), private subnet (app servers), and database subnet
+- Test connectivity paths: Internet → ALB → App Servers → Database
+- Validate NAT Gateway provides outbound access for private subnet
+- Confirm cross-AZ communication within the VPC
+
+**Validation Methods:**
+- Telnet/nc testing for specific ports (80, 8080, 3306)
+- Traceroute to verify routing paths
+- DNS resolution testing between tiers
+- Network latency measurement between components
+
+---
+
+## Security Isolation Verification
+
+**Testing Approach:**
+- Validate security group rules enforce proper tier isolation
+- Confirm database is only accessible from application tier
+- Verify no direct internet access to private resources
+- Test unauthorized access attempts fail appropriately
+
+**Validation Methods:**
+- Attempt direct database connection from internet (should fail)
+- Test application server access bypassing ALB (should fail)  
+- Port scanning from unauthorized sources
+- Security group rule validation against requirements
+
+---
+
+## Performance and Scalability Aspects
+
+**Testing Approach:**
+- Establish performance baselines for each tier
+- Test system behavior under increasing load
+- Validate load balancer distributes traffic effectively
+- Measure response times and throughput limits
+
+**Validation Methods:**
+- Load testing with Apache Bench (ab) for HTTP traffic
+- Database connection and query performance testing
+- Concurrent user simulation up to expected capacity
+- Resource utilization monitoring during load tests
+
+---
+
+## Integration Points with Other Services
+
+**Testing Approach:**
+- Verify ALB health checks function correctly
+- Test application-to-database connectivity and transactions
+- Validate monitoring and logging integration
+- Confirm infrastructure provisioning consistency
+
+**Validation Methods:**
+- ALB target health status verification
+- Database connection pooling and transaction testing
+- CloudWatch metrics collection validation
+- Terraform deployment repeatability testing
+# Part 4: API Test Scenarios - VPC Management API
+
+## 1. CRUD Operations Testing
+
+### Create VPC (POST /v1/vpcs)
+
+#### API-001: Create VPC with Valid Data
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "test-vpc-001",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1",
+  "enable_dns_resolution": true,
+  "enable_dns_hostnames": false
+}
+```
+**Expected Response:** 201 Created
+**Expected Payload:**
+```json
+{
+  "id": "vpc-12345abc",
+  "name": "test-vpc-001",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1",
+  "enable_dns_resolution": true,
+  "enable_dns_hostnames": false,
+  "state": "creating",
+  "created_at": "2025-07-17T10:00:00Z"
+}
+```
+
+#### API-002: Create VPC with Minimal Required Fields
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "minimal-vpc",
+  "cidr_block": "172.16.0.0/16",
+  "region": "us-west-2"
+}
+```
+**Expected Response:** 201 Created
+
+### Read VPC Operations (GET)
+
+#### API-003: Get All VPCs
+**Endpoint:** GET /v1/vpcs  
+**Expected Response:** 200 OK
+**Expected Payload:**
+```json
+{
+  "vpcs": [
+    {
+      "id": "vpc-12345abc",
+      "name": "test-vpc-001",
+      "cidr_block": "10.0.0.0/16",
+      "region": "us-east-1",
+      "state": "available"
+    }
+  ],
+  "count": 1
+}
+```
+
+#### API-004: Get Specific VPC by ID
+**Endpoint:** GET /v1/vpcs/{vpc_id}  
+**Expected Response:** 200 OK
+**Expected Payload:** Full VPC object with all details
+
+#### API-005: Get Non-Existent VPC
+**Endpoint:** GET /v1/vpcs/vpc-nonexistent  
+**Expected Response:** 404 Not Found
+**Expected Payload:**
+```json
+{
+  "error": "VPC not found",
+  "error_code": "VPC_NOT_FOUND"
+}
+```
+
+### Update VPC (PUT /v1/vpcs/{vpc_id})
+
+#### API-006: Update VPC Name
+**Endpoint:** PUT /v1/vpcs/{vpc_id}  
+**Test Data:**
+```json
+{
+  "name": "updated-vpc-name",
+  "enable_dns_resolution": false
+}
+```
+**Expected Response:** 200 OK
+
+#### API-007: Update Non-Existent VPC
+**Endpoint:** PUT /v1/vpcs/vpc-nonexistent  
+**Expected Response:** 404 Not Found
+
+### Delete VPC (DELETE /v1/vpcs/{vpc_id})
+
+#### API-008: Delete Existing VPC
+**Endpoint:** DELETE /v1/vpcs/{vpc_id}  
+**Expected Response:** 204 No Content
+
+#### API-009: Delete Non-Existent VPC
+**Endpoint:** DELETE /v1/vpcs/vpc-nonexistent  
+**Expected Response:** 404 Not Found
+
+---
+
+## 2. Input Validation Testing
+
+### CIDR Block Validation
+
+#### API-010: Invalid CIDR - Outside Range
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "invalid-cidr-vpc",
+  "cidr_block": "10.0.0.0/15",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+**Expected Error:** "CIDR block must be between /16 and /28"
+
+#### API-011: Invalid CIDR - Malformed
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "malformed-cidr-vpc",
+  "cidr_block": "10.0.0.0",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+#### API-012: Invalid CIDR - Public IP Range
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "public-ip-vpc",
+  "cidr_block": "8.8.8.0/24",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+**Expected Error:** "Only private IP ranges allowed"
+
+### Name Validation
+
+#### API-013: Empty VPC Name
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+#### API-014: VPC Name Too Long
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "a" * 256,
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+#### API-015: Invalid Characters in Name
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "test@vpc#invalid",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+### Missing Required Fields
+
+#### API-016: Missing Name Field
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+#### API-017: Missing CIDR Block
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "test-vpc",
+  "region": "us-east-1"
+}
+```
+**Expected Response:** 400 Bad Request
+
+---
+
+## 3. Authentication and Authorization Testing
+
+#### API-018: Request Without Authentication
+**Endpoint:** POST /v1/vpcs (no auth headers)  
+**Expected Response:** 401 Unauthorized
+**Expected Payload:**
+```json
+{
+  "error": "Authentication required",
+  "error_code": "AUTH_REQUIRED"
+}
+```
+
+#### API-019: Request with Invalid Token
+**Endpoint:** POST /v1/vpcs  
+**Headers:** Authorization: Bearer invalid_token  
+**Expected Response:** 401 Unauthorized
+
+#### API-020: Request with Expired Token
+**Endpoint:** POST /v1/vpcs  
+**Headers:** Authorization: Bearer expired_token  
+**Expected Response:** 401 Unauthorized
+
+#### API-021: Insufficient Permissions
+**Endpoint:** DELETE /v1/vpcs/{vpc_id} (using read-only token)  
+**Expected Response:** 403 Forbidden
+**Expected Payload:**
+```json
+{
+  "error": "Insufficient permissions",
+  "error_code": "INSUFFICIENT_PERMISSIONS"
+}
+```
+
+---
+
+## 4. Error Handling Testing
+
+#### API-022: Overlapping CIDR Block
+**Endpoint:** POST /v1/vpcs  
+**Test Data:**
+```json
+{
+  "name": "overlapping-vpc",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1"
+}
+```
+**Prerequisite:** VPC with 10.0.0.0/16 already exists in us-east-1  
+**Expected Response:** 409 Conflict
+**Expected Error:** "CIDR block overlaps with existing VPC"
+
+#### API-023: Account Limit Exceeded
+**Endpoint:** POST /v1/vpcs  
+**Prerequisite:** 5 VPCs already exist in target region  
+**Expected Response:** 429 Too Many Requests
+**Expected Error:** "Account limit of 5 VPCs per region exceeded"
+
+#### API-024: Invalid JSON Payload
+**Endpoint:** POST /v1/vpcs  
+**Test Data:** `{"name": "test", "cidr_block": }`  
+**Expected Response:** 400 Bad Request
+**Expected Error:** "Invalid JSON format"
+
+#### API-025: Unsupported HTTP Method
+**Endpoint:** PATCH /v1/vpcs  
+**Expected Response:** 405 Method Not Allowed
+
+#### API-026: Invalid Content-Type
+**Endpoint:** POST /v1/vpcs  
+**Headers:** Content-Type: text/plain  
+**Expected Response:** 415 Unsupported Media Type
+
+---
+
+## 5. Rate Limiting Testing
+
+#### API-027: Rate Limit Threshold Test
+**Test Steps:**
+1. Send 100 requests/minute to POST /v1/vpcs
+2. Monitor response times and success rates
+3. Verify rate limiting kicks in appropriately
+
+**Expected Behavior:**
+- Requests under limit: 201/200 responses
+- Requests over limit: 429 Too Many Requests
+- Rate limit headers present
+
+#### API-028: Rate Limit Headers Validation
+**Expected Headers:**
+```
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 95
+X-RateLimit-Reset: 1690454400
+```
+
+#### API-029: Rate Limit Recovery Test
+**Test Steps:**
+1. Trigger rate limit
+2. Wait for reset period
+3. Verify normal operation resumes
+
+---
+
+## 6. Concurrent Request Handling
+
+#### API-030: Concurrent VPC Creation
+**Test Steps:**
+1. Send 10 simultaneous POST requests with different VPC names
+2. Verify all succeed with unique IDs
+3. Check for race conditions
+
+**Expected Results:**
+- All requests return 201 Created
+- Each VPC gets unique ID
+- No duplicate names/CIDRs created
+
+#### API-031: Concurrent Overlapping CIDR Test
+**Test Steps:**
+1. Send 5 simultaneous POST requests with same CIDR block
+2. Verify only one succeeds
+3. Others return 409 Conflict
+
+**Expected Results:**
+- Exactly one 201 Created response
+- Four 409 Conflict responses
+- No data corruption
+
+#### API-032: Read-Write Concurrency
+**Test Steps:**
+1. Start continuous GET /v1/vpcs requests
+2. Simultaneously execute POST/PUT/DELETE operations
+3. Verify read consistency
+
+**Expected Results:**
+- GET requests remain responsive
+- No stale data returned
+- Write operations complete successfully
+
+---
+
+########################################################################################################################
+
+# Test Implementation Plan - VPC Management API
+
+## Testing Tools/Framework Recommendation
+
+**Primary Tool:** Postman
+- Easy to use GUI interface
+- Built-in test scripts
+- Collection organization
+- Environment variables
+
+**For CI/CD:** Newman (Postman CLI)
+```bash
+newman run vpc-tests.json --environment staging.json
+```
+
+**Alternative:** curl + bash scripts for simple automation
+
+## Test Data Setup Requirements
+
+**Clean Environment:**
+- Delete all existing VPCs before testing
+- Have 3 test user accounts: admin, read-only, write-only
+
+**Test Data:**
+```json
+{
+  "valid_vpc": {
+    "name": "test-vpc",
+    "cidr_block": "10.0.0.0/16", 
+    "region": "us-east-1"
+  },
+  "invalid_vpc": {
+    "name": "",
+    "cidr_block": "10.0.0.0/15",
+    "region": "invalid-region"
+  }
+}
+```
+
+## Expected Response Codes and Payloads
+
+**Success:**
+- 200 OK: GET, PUT operations
+- 201 Created: POST operations  
+- 204 No Content: DELETE operations
+
+**Errors:**
+- 400: Bad request (validation errors)
+- 401: No authentication
+- 403: Insufficient permissions
+- 404: VPC not found
+- 409: CIDR overlap
+- 429: Rate limit exceeded
+
+**Sample Response:**
+```json
+{
+  "id": "vpc-12345",
+  "name": "test-vpc",
+  "cidr_block": "10.0.0.0/16",
+  "region": "us-east-1",
+  "state": "available"
+}
+```
+
+## Performance Baseline Suggestions
+
+**Response Times:**
+- GET requests: < 200ms
+- POST requests: < 500ms
+- PUT/DELETE: < 300ms
+
+**Load Targets:**
+- 100 requests/minute sustained
+- 50 concurrent users
+- Error rate < 1%
+
+**Tools:** k6 or Apache Bench for basic load testing
