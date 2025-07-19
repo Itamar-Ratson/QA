@@ -88,7 +88,7 @@
 ## Bug VPC-002: DNS Resolution Not Working
 
 **Summary:** DNS fails despite being enabled during VPC creation
-**Severity:** CRITICAL | **Priority:** CRITICAL
+**Severity:** HIGH | **Priority:** HIGH
 
 **Steps to Reproduce:**
 1. Create VPC with DNS resolution enabled in us-west-2
@@ -217,6 +217,15 @@ Expected: 200 OK with VPC array
 **GET /v1/vpcs/{id} - Get Specific VPC**
 Expected: 200 OK or 404 Not Found
 
+**PUT /v1/vpcs/{id} - Update VPC**
+```json
+{
+  "name": "updated-vpc-name",
+  "enable_dns_resolution": false
+}
+```
+Expected: 200 OK
+
 **DELETE /v1/vpcs/{id} - Delete VPC**
 Expected: 204 No Content
 
@@ -249,6 +258,11 @@ Expected: 204 No Content
 
 **Tools:** Postman for manual testing, Newman for CI/CD
 
+**Test Setup:**
+- Clean staging environment
+- Test accounts: admin, read-only, write-only
+- Valid auth tokens for each permission level
+
 **Test Data:**
 ```json
 {
@@ -260,55 +274,11 @@ Expected: 204 No Content
 }
 ```
 
-**Performance Baselines:**
-- GET: <200ms
-- POST: <500ms
-- Error rate: <1%
-- 50 concurrent users supported
-
-**Test Environment Setup:**
-- Clean staging environment with all existing VPCs deleted
-- Test user accounts: admin (full access), read-only, write-only
-- Valid authentication tokens for each permission level
-- Base URL configured for staging API endpoint
-
-**Test Execution Approach:**
-1. **Setup Phase:** Configure Postman collections with environment variables
-2. **Sequential Testing:** Run CRUD operations first, then validation tests
-3. **Concurrent Testing:** Execute simultaneous requests using Newman
-4. **Cleanup:** Reset environment state between test runs
-
 **Expected Response Codes:**
-- **Success:** 200 (GET/PUT), 201 (POST), 204 (DELETE)
-- **Client Errors:** 400 (validation), 401 (auth), 403 (permissions), 404 (not found), 409 (conflict), 429 (rate limit)
-- **Server Errors:** 500 (internal error), 503 (service unavailable)
+- Success: 200 (GET/PUT), 201 (POST), 204 (DELETE)
+- Errors: 400 (validation), 401 (auth), 403 (permissions), 404 (not found), 409 (conflict), 429 (rate limit)
 
-**Sample Error Response:**
-```json
-{
-  "error": "CIDR block must be between /16 and /28",
-  "error_code": "INVALID_CIDR_RANGE",
-  "timestamp": "2025-07-17T10:00:00Z"
-}
-```
-
-**Load Testing Setup:**
-- Use k6 or Apache Bench for performance testing
-- Baseline: 100 requests/minute sustained load
-- Stress test: Gradually increase to 200 requests/minute
-- Monitor response times and error rates during load
-
-**CI/CD Integration:**
-```bash
-# Run API tests in pipeline
-newman run vpc-api-tests.json \
-  --environment staging.json \
-  --reporters cli,junit \
-  --reporter-junit-export results.xml
-```
-
-**Test Reporting:**
-- Pass/fail status for each test scenario
-- Response time metrics and SLA compliance
-- Error rate analysis and trending
-- Security validation results (auth/authorization tests)
+**Performance Targets:**
+- Response times: GET <200ms, POST <500ms
+- Load: 100 requests/minute, 50 concurrent users
+- Error rate: <1%
